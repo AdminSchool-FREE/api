@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Escola {
+  id             String           @id @default(uuid())
+  nome           String
+  Turma          Turma[]
+  Usuario        Usuario[]
+  ModeloMensagem ModeloMensagem[]
+  ReportSistema  ReportSistema[]
+  Configuracoes  Configuracoes[]
+}
+
+model Turma {
+  id       String  @id @default(uuid())
+  nome     String
+  idEscola String
+  escola   Escola  @relation(fields: [idEscola], references: [id])
+  Aluno    Aluno[]
+}
+
+model Usuario {
+  id       String  @id @default(uuid())
+  nome     String
+  email    String  @unique
+  senha    String
+  status   Boolean @default(true)
+  idEscola String
+  escola   Escola  @relation(fields: [idEscola], references: [id])
+}
+
+model ModeloMensagem {
+  id       String @id @default(uuid())
+  assunto  String
+  modelo   String @db.LongText
+  idEscola String
+  escola   Escola @relation(fields: [idEscola], references: [id])
+}
+
+model ReportSistema {
+  id       String  @id @default(uuid())
+  problema String  @db.LongText
+  imagem   String? @db.LongText
+  idEscola String
+  escola   Escola  @relation(fields: [idEscola], references: [id])
+}
+
+model Configuracoes {
+  id                             String  @id @default(uuid())
+  login_api_whatsapp             String? @unique
+  senha_api_whatsapp             String?
+  token_dispositivo_api_whatsapp String? @unique
+  token_api_whatsapp             String? @db.LongText
+  idEscola                       String  @unique
+  escola                         Escola  @relation(fields: [idEscola], references: [id])
+}
+
+model Aluno {
+  id                          String                        @id @default(uuid())
+  nome                        String
+  cpf                         String                        @unique
+  ra                          String                        @unique
+  rg                          String                        @unique
+  dataNascimento              DateTime                      @db.Date
+  idTurma                     String
+  turma                       Turma                         @relation(fields: [idTurma], references: [id])
+  ResponsavelAluno            ResponsavelAluno[]
+  NotificacaoResponsavelAluno NotificacaoResponsavelAluno[]
+  ChamadaTurma                ChamadaTurma[]
+}
+
+model Responsavel {
+  id                          String                        @id @default(uuid())
+  nome                        String
+  cpf                         String                        @unique
+  TelefoneResponsavel         TelefoneResponsavel[]
+  ResponsavelAluno            ResponsavelAluno[]
+  NotificacaoResponsavelAluno NotificacaoResponsavelAluno[]
+}
+
+model TelefoneResponsavel {
+  id            String      @id @default(uuid())
+  ddd           String
+  telefone      String      @unique
+  whatsapp      Boolean     @default(true)
+  idResponsavel String
+  responsavel   Responsavel @relation(fields: [idResponsavel], references: [id])
+}
+
+model ResponsavelAluno {
+  idResponsavel String
+  responsavel   Responsavel @relation(fields: [idResponsavel], references: [id])
+  idAluno       String
+  aluno         Aluno       @relation(fields: [idAluno], references: [id])
+
+  @@id([idAluno, idResponsavel])
+}
+
+model NotificacaoResponsavelAluno {
+  id            String      @id @default(uuid())
+  mensagem      String      @db.LongText
+  criadoEm      DateTime    @default(now())
+  enviadoEm     DateTime?
+  idResponsavel String
+  responsavel   Responsavel @relation(fields: [idResponsavel], references: [id])
+  idAluno       String
+  aluno         Aluno       @relation(fields: [idAluno], references: [id])
+}
+
+model ChamadaTurma {
+  id          String   @id @default(uuid())
+  dataChamada DateTime
+  presenca    Boolean  @default(true)
+  idAluno     String
+  aluno       Aluno    @relation(fields: [idAluno], references: [id])
+}

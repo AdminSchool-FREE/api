@@ -1,0 +1,39 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src",
+    "lint": "eslint src --ext [.ts] --fix",
+    "start": "node dist/index.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.2.2",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.12.12",
+    "eslint": "^9.3.0",
+    "prisma": "^5.14.0",
+    "tsup": "^8.0.2",
+    "tsx": "^4.10.5",
+    "typescript": "^5.4.5"
+  },
+  "packageManager": "pnpm@9.1.1+sha512.14e915759c11f77eac07faba4d019c193ec8637229e62ec99eefb7cf3c3b75c64447882b7c485142451ee3a6b408059cdfb7b7fa0341b975f12d0f7629c71195",
+  "dependencies": {
+    "@fastify/cookie": "^9.3.1",
+    "@fastify/cors": "^9.0.1",
+    "@prisma/client": "5.14.0",
+    "axios": "^1.7.0",
+    "bcrypt": "^5.1.1",
+    "fastify": "^4.27.0",
+    "zod": "^3.23.8"
+  }
+}
