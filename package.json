@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsup src",
+    "build": "tsup src ",
     "lint": "eslint src --ext [.ts] --fix",
     "start": "node dist/index.cjs"
   },
