@@ -28,7 +28,6 @@ class AuthController {
             secure: true,
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'lax',
-            domain: '*',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
@@ -36,7 +35,6 @@ class AuthController {
             secure: true,
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'lax',
-            domain: '*',
             path: '/',
           })
           .send({
