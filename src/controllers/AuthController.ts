@@ -27,8 +27,8 @@ class AuthController {
             httpOnly: true,
             secure: true,
             maxAge: 60 * 60 * 24 * 1,
-            domain: 'https://app-liard-one.vercel.app',
             sameSite: 'lax',
+            domain: '*',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
@@ -36,7 +36,7 @@ class AuthController {
             secure: true,
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'lax',
-            domain: 'https://api-xca2.onrender.com',
+            domain: '*',
             path: '/',
           })
           .send({
