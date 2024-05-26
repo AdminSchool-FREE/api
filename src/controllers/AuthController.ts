@@ -28,6 +28,7 @@ class AuthController {
             secure: 'auto',
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'none',
+            domain: 'https://app-d4at.onrender.com',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
