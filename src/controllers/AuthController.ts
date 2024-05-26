@@ -25,12 +25,14 @@ class AuthController {
         reply.status(202)
           .setCookie('session-user', validaUsuario?.id, {
             httpOnly: true,
+            secure: true,
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'none',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
             httpOnly: true,
+            secure: true,
             maxAge: 60 * 60 * 24 * 1,
             sameSite: 'none',
             path: '/',
