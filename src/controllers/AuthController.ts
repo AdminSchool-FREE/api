@@ -27,7 +27,6 @@ class AuthController {
             httpOnly: true,
             secure: 'auto',
             maxAge: 60 * 60 * 24 * 1,
-            sameSite: 'lax',
             domain: 'onrender.com',
             path: '/',
           })
@@ -35,7 +34,6 @@ class AuthController {
             httpOnly: true,
             secure: 'auto',
             maxAge: 60 * 60 * 24 * 1,
-            sameSite: 'lax',
             domain: 'onrender.com',
             path: '/',
           })
