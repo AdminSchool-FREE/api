@@ -362,7 +362,7 @@ class TurmaController{
 
                   const contatoResponsavel = contato.ddd + contato.telefone
 
-                  const mensagem = `Prezado(a) responsável do aluno(a) ${responsaveisAluno.aluno.nome}, não compareceu à aula neste dia`
+                  const mensagem = `Prezado(a) responsável, o aluno(a) ${responsaveisAluno.aluno.nome} não compareceu à aula hoje.`
 
                   disparos.push(servicoWhatsapp.enviarMensagem(mensagem, contatoResponsavel))
 
