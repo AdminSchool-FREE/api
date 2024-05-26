@@ -27,12 +27,14 @@ class AuthController {
             httpOnly: true,
             secure: 'auto',
             maxAge: 60 * 60 * 24 * 1,
+            sameSite: 'none',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
             httpOnly: true,
             secure: 'auto',
             maxAge: 60 * 60 * 24 * 1,
+            sameSite: 'none',
             path: '/',
           })
           .send({
