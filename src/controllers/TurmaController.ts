@@ -1,13 +1,22 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { alterarNomeTurma, inserirTurma, listarTurmasEscola, salvarChamadaTurma } from "../repositories/TurmaRepository";
-import { buscarResponsaveisAlunos, excluirMatricula, inserirAluno, inserirNotificacoes, listarAlunosTurmaEscola, NovaNotificacaoProps, salvarTransferenciaAlunoTurma, salvarTransferenciasAlunosTurma } from "../repositories/AlunoRepository";
+import {
+  buscarResponsaveisAlunos,
+  excluirMatricula, 
+  inserirNotificacoes, 
+  listarAlunosTurmaEscola, 
+  matricularNovoAluno, 
+  NovaNotificacaoProps, 
+  salvarTransferenciaAlunoTurma, 
+  salvarTransferenciasAlunosTurma
+} from "../repositories/AlunoRepository";
 import WhatsappService from "../services/WhatsappService";
 import { buscarConfiguracoesApiWhatsapp } from "../repositories/EscolaRepository";
 
-class TurmaController{
+class TurmaController {
 
-  async criarTurma(app: FastifyInstance){
+  async criarTurma(app: FastifyInstance) {
     const bodyTurma = z.object({
       nome: z.string()
     })
@@ -20,12 +29,12 @@ class TurmaController{
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
-        const turma = await inserirTurma({nome, idEscola})
+      if (idEscola) {
+        const turma = await inserirTurma({ nome, idEscola })
 
         res.status(201).send(turma)
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -33,17 +42,17 @@ class TurmaController{
     })
   }
 
-  async listarTurmas(app: FastifyInstance){
+  async listarTurmas(app: FastifyInstance) {
     app.get('/', async (req, res) => {
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
+      if (idEscola) {
         const turmas = await listarTurmasEscola(idEscola)
 
         res.status(200).send(turmas)
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -51,7 +60,7 @@ class TurmaController{
     })
   }
 
-  async renomearTurma(app: FastifyInstance){
+  async renomearTurma(app: FastifyInstance) {
     const paramTurma = z.object({
       id: z.string().uuid()
     })
@@ -72,14 +81,14 @@ class TurmaController{
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
-        
-          const alteraTurma = await alterarNomeTurma(nome,idEscola, id)
+      if (idEscola) {
 
-          res.status(200).send(alteraTurma)
-        
+        const alteraTurma = await alterarNomeTurma(nome, idEscola, id)
+
+        res.status(200).send(alteraTurma)
+
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -87,7 +96,7 @@ class TurmaController{
     })
   }
 
-  async listarAlunosTurma(app: FastifyInstance){
+  async listarAlunosTurma(app: FastifyInstance) {
     const paramTurma = z.object({
       id: z.string().uuid()
     })
@@ -100,12 +109,12 @@ class TurmaController{
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
+      if (idEscola) {
         const alunos = await listarAlunosTurmaEscola(idEscola, id)
 
         res.status(200).send(alunos)
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -113,7 +122,7 @@ class TurmaController{
     })
   }
 
-  async matricularAlunoTurma(app: FastifyInstance){
+  async matricularAlunoTurma(app: FastifyInstance) {
     const schemaBodyAluno = z.object({
       nome: z.string({
         required_error: 'O nome do aluno é obrigatório',
@@ -181,8 +190,8 @@ class TurmaController{
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
-        const aluno = await inserirAluno({
+      if (idEscola) {
+        const aluno = await matricularNovoAluno({
           nome,
           cpf,
           rg,
@@ -199,7 +208,7 @@ class TurmaController{
     })
   }
 
-  async transferirAlunoTurma(app: FastifyInstance){
+  async transferirAlunoTurma(app: FastifyInstance) {
     const bodyTurma = z.object({
       idTurma: z.string().uuid()
     })
@@ -211,7 +220,7 @@ class TurmaController{
     app.patch('/aluno/:id/transferir', async (req, res) => {
       const cookieSession = req.cookies
 
-      if(cookieSession['session-company']){
+      if (cookieSession['session-company']) {
         const {
           id
         } = await paramAluno.parseAsync(req.params)
@@ -227,7 +236,7 @@ class TurmaController{
 
         res.status(201).send(transferencia)
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -235,24 +244,24 @@ class TurmaController{
     })
   }
 
-  async transferirAlunosTurma(app: FastifyInstance){
-   
+  async transferirAlunosTurma(app: FastifyInstance) {
+
     const bodyTransferencias = z.object({
       alunos: z.array(
         z.object({
           id: z.string().uuid()
         }
-      )),
+        )),
       idTurma: z.string().uuid()
     })
 
-    app.patch('/alunos/transferencias', async(req, res) => {
+    app.patch('/alunos/transferencias', async (req, res) => {
       const cookieSession = req.cookies
 
-      if(cookieSession['session-company']){
-        const {alunos, idTurma} = await bodyTransferencias.parseAsync(req.body)
+      if (cookieSession['session-company']) {
+        const { alunos, idTurma } = await bodyTransferencias.parseAsync(req.body)
 
-        try{
+        try {
           await salvarTransferenciasAlunosTurma(
             alunos.map((aluno) => aluno.id),
             idTurma
@@ -262,13 +271,13 @@ class TurmaController{
             message: 'Transferências realizadas com sucesso'
           })
         }
-        catch(error){
+        catch (error) {
           res.status(400).send({
             message: 'Houve um problema ao fazer transferencias dos alunos'
           })
         }
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -276,7 +285,7 @@ class TurmaController{
     })
   }
 
-  async excluirMatriculaAluno(app: FastifyInstance){
+  async excluirMatriculaAluno(app: FastifyInstance) {
     const paramAluno = z.object({
       id: z.string().uuid()
     })
@@ -289,12 +298,12 @@ class TurmaController{
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
+      if (idEscola) {
         const aluno = await excluirMatricula(id, idEscola)
 
         res.status(200).send(aluno)
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })
@@ -302,7 +311,7 @@ class TurmaController{
     })
   }
 
-  async realizarChamadaTurma(app: FastifyInstance){
+  async realizarChamadaTurma(app: FastifyInstance) {
     const bodyChamada = z.object({
       chamada: z.array(
         z.object({
@@ -313,13 +322,13 @@ class TurmaController{
     })
 
     app.post('/chamada', async (req, res) => {
-      const {chamada} = await bodyChamada.parseAsync(req.body)
+      const { chamada } = await bodyChamada.parseAsync(req.body)
 
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
 
-      if(idEscola){
-        try{
+      if (idEscola) {
+        try {
           const dadosChamada = chamada.map((aluno) => {
             return {
               idAluno: aluno.idAluno,
@@ -331,7 +340,7 @@ class TurmaController{
           await salvarChamadaTurma(dadosChamada)
 
         }
-        catch(error){
+        catch (error) {
           res.status(500).send({
             message: 'Houve um problema ao salvar a chamada do dia'
           })
@@ -339,13 +348,13 @@ class TurmaController{
 
         const listaAlunosAusentes = chamada.filter((aluno) => !aluno.presente)
 
-        if(listaAlunosAusentes.length > 0){
+        if (listaAlunosAusentes.length > 0) {
           const listaResponsaveis = await buscarResponsaveisAlunos(listaAlunosAusentes.map((aluno) => aluno.idAluno))
 
           const mensagens: Array<NovaNotificacaoProps> = []
           const disparos: Array<any> = []
 
-          if (listaResponsaveis){
+          if (listaResponsaveis) {
 
             const configuracoesEscola = await buscarConfiguracoesApiWhatsapp(idEscola)
 
@@ -393,7 +402,7 @@ class TurmaController{
           }
         }
       }
-      else{
+      else {
         res.status(401).send({
           message: 'Sessão encerrada!'
         })

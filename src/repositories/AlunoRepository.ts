@@ -36,47 +36,92 @@ export async function listarAlunosTurmaEscola(idEscola: string, idTurma: string)
   return alunos
 }
 
-export async function inserirAluno({nome, cpf, ra, rg, dataNascimento, idTurma, nomeResponsavel, cpfResponsavel, telefones}: NovoAlunoProps){
-  const aluno = await prisma.responsavelAluno.create({
-    select: {
-      aluno: {
-        select: {
-          id: true,
-          nome: true,
-          cpf: true,
-          ra: true,
-          rg: true,
-          dataNascimento: true,
-          idTurma: true
+
+export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, idTurma, nomeResponsavel, cpfResponsavel, telefones}: NovoAlunoProps){
+  const verificaExisteResponsavel = await prisma.responsavel.findUnique({
+    where: {
+      cpf: cpfResponsavel
+    }
+  })
+
+  if(verificaExisteResponsavel){
+    const aluno =await prisma.responsavelAluno.create({
+      select: {
+        aluno: {
+          select: {
+            id: true,
+            nome: true,
+            cpf: true,
+            ra: true,
+            rg: true,
+            dataNascimento: true,
+            idTurma: true
+          }
         }
-      }
-    },
-    data: {
-      aluno: {
-        create: {
-          nome,
-          cpf,
-          ra,
-          rg,
-          dataNascimento,
-          idTurma,
-        },
       },
-      responsavel: {
-        create: {
-          nome: nomeResponsavel,
-          cpf: cpfResponsavel,
-          TelefoneResponsavel: {
-            createMany: {
-              data: telefones
-            }
+      data: {
+        aluno: {
+          create: {
+            nome,
+            cpf,
+            ra,
+            rg,
+            dataNascimento,
+            idTurma,
+          },
+        },
+        responsavel: {
+          connect: {
+            id: verificaExisteResponsavel.id
           }
         }
       }
-    },
-  })
+    })
 
-  return aluno.aluno
+    return aluno.aluno
+  }
+  else{
+    const aluno = await prisma.responsavelAluno.create({
+      select: {
+        aluno: {
+          select: {
+            id: true,
+            nome: true,
+            cpf: true,
+            ra: true,
+            rg: true,
+            dataNascimento: true,
+            idTurma: true
+          }
+        }
+      },
+      data: {
+        aluno: {
+          create: {
+            nome,
+            cpf,
+            ra,
+            rg,
+            dataNascimento,
+            idTurma,
+          },
+        },
+        responsavel: {
+          create: {
+            nome: nomeResponsavel,
+            cpf: cpfResponsavel,
+            TelefoneResponsavel: {
+              createMany: {
+                data: telefones
+              }
+            }
+          }
+        }
+      },
+    })
+  
+    return aluno.aluno
+  }
 }
 
 export async function salvarTransferenciaAlunoTurma(idAluno: string, idTurma: string){
