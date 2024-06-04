@@ -162,112 +162,30 @@ export async function salvarTransferenciasAlunosTurma(idsAlunos: Array<string>, 
 }
 
 export async function excluirMatricula(idAluno: string, idEscola: string){
-  const dadosAlunoResponsavel = await prisma.responsavelAluno.findFirst({
+
+  const deletaRegistrosChamadaAluno = prisma.chamadaTurma.deleteMany({
     where: {
-      idAluno,
-      aluno: {
-        turma: {
-          idEscola
-        }
-      }
+      idAluno
     }
   })
 
-  const verificaExisteVinculoAlunoResponsavel = await prisma.responsavelAluno.findFirst({
+  const deletaNotificacoesResponsavelAluno = prisma.notificacaoResponsavelAluno.deleteMany({
     where: {
-      idResponsavel: dadosAlunoResponsavel?.idResponsavel,
-      NOT: {
-        idAluno
-      }
+      id: idAluno,
     }
   })
 
-  if(dadosAlunoResponsavel){
-    if(verificaExisteVinculoAlunoResponsavel){
-
-      const deletaResponsavelAluno = prisma.responsavelAluno.deleteMany({
-        where: {
-          idAluno,
-          idResponsavel: dadosAlunoResponsavel.idResponsavel
-        }
-      })
-
-      const deletaRegistrosChamadaAluno = prisma.chamadaTurma.deleteMany({
-        where: {
-          idAluno
-        }
-      })
-
-      const deletaNotificacoesResponsavelAluno = prisma.notificacaoResponsavelAluno.deleteMany({
-        where: {
-          id: idAluno,
-          idResponsavel: dadosAlunoResponsavel.idResponsavel
-        }
-      })
-
-      const deletaAluno = prisma.aluno.delete({
-        where: {
-          id: idAluno
-        }
-      })
-
-      return await prisma.$transaction([
-        deletaResponsavelAluno, 
-        deletaRegistrosChamadaAluno,
-        deletaNotificacoesResponsavelAluno,
-        deletaAluno,
-      ])
+  const deletaAluno = prisma.aluno.delete({
+    where: {
+      id: idAluno
     }
-    else{    
-      const deletaResponsavelAluno = prisma.responsavelAluno.deleteMany({
-        where: {
-          idAluno,
-          idResponsavel: dadosAlunoResponsavel.idResponsavel
-        }
-      })
+  })
 
-      const deletaRegistrosChamadaAluno = prisma.chamadaTurma.deleteMany({
-        where: {
-          idAluno
-        }
-      })
-
-      const deletaNotificacoesResponsavelAluno = prisma.notificacaoResponsavelAluno.deleteMany({
-        where: {
-          id: idAluno,
-          idResponsavel: dadosAlunoResponsavel.idResponsavel
-        }
-      })
-
-      const deletaTelefonesResponsavel = prisma.telefoneResponsavel.deleteMany({
-        where: {
-          idResponsavel: dadosAlunoResponsavel.idResponsavel
-        }
-      })
-
-      const deletaResponsavel = prisma.responsavel.delete({
-        where: {
-          id: dadosAlunoResponsavel.idResponsavel
-        }
-      })
-
-      const deletaAluno = prisma.aluno.delete({
-        where: {
-          id: idAluno
-        }
-      })
-      
-      return await prisma.$transaction([
-        deletaResponsavelAluno, 
-        deletaRegistrosChamadaAluno,
-        deletaNotificacoesResponsavelAluno,
-        deletaTelefonesResponsavel,
-        deletaAluno,
-        deletaResponsavel,
-      ])
-    }
-  }
-  
+  return await prisma.$transaction([
+    deletaRegistrosChamadaAluno,
+    deletaNotificacoesResponsavelAluno,
+    deletaAluno,
+  ])
 }
 
 export async function buscarDadosResponsavelAluno(idAluno: string){
