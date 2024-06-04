@@ -171,7 +171,7 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
 
   const deletaNotificacoesResponsavelAluno = prisma.notificacaoResponsavelAluno.deleteMany({
     where: {
-      id: idAluno,
+      idAluno,
     }
   })
 
