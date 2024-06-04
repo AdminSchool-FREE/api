@@ -192,12 +192,6 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
         }
       })
 
-      const deletaAluno = prisma.aluno.delete({
-        where: {
-          id: idAluno
-        }
-      })
-
       const deletaRegistrosChamadaAluno = prisma.chamadaTurma.deleteMany({
         where: {
           idAluno
@@ -208,6 +202,12 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
         where: {
           id: idAluno,
           idResponsavel: dadosAlunoResponsavel.idResponsavel
+        }
+      })
+
+      const deletaAluno = prisma.aluno.delete({
+        where: {
+          id: idAluno
         }
       })
 
@@ -239,12 +239,6 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
         }
       })
 
-      const deletaAluno = prisma.aluno.delete({
-        where: {
-          id: idAluno
-        }
-      })
-
       const deletaTelefonesResponsavel = prisma.telefoneResponsavel.deleteMany({
         where: {
           idResponsavel: dadosAlunoResponsavel.idResponsavel
@@ -256,13 +250,19 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
           id: dadosAlunoResponsavel.idResponsavel
         }
       })
+
+      const deletaAluno = prisma.aluno.delete({
+        where: {
+          id: idAluno
+        }
+      })
       
       return await prisma.$transaction([
         deletaResponsavelAluno, 
         deletaRegistrosChamadaAluno,
         deletaNotificacoesResponsavelAluno,
-        deletaAluno,
         deletaTelefonesResponsavel,
+        deletaAluno,
         deletaResponsavel,
       ])
     }
