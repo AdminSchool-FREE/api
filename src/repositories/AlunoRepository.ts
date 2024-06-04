@@ -175,15 +175,25 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
     }
   })
 
+  const deletaResponsavelAluno = prisma.responsavelAluno.deleteMany({
+    where: {
+      idAluno,
+    }
+  })
+
   const deletaAluno = prisma.aluno.delete({
     where: {
-      id: idAluno
+      id: idAluno,
+      turma: {
+        idEscola
+      }
     }
   })
 
   return await prisma.$transaction([
     deletaRegistrosChamadaAluno,
     deletaNotificacoesResponsavelAluno,
+    deletaResponsavelAluno,
     deletaAluno,
   ])
 }
