@@ -48,7 +48,7 @@ class MensagemController {
 
                 responsaveisAluno.responsavel.TelefoneResponsavel.forEach((contato) => {
 
-                  const contatoResponsavel = contato.ddd + contato.telefone
+                  const contatoResponsavel = contato.ddd.trim() + contato.telefone.trim()
 
                   disparos.push(servicoWhatsapp.enviarMensagem(mensagem, contatoResponsavel))
                 })
@@ -71,7 +71,8 @@ class MensagemController {
               }
               catch (err) {
                 res.status(500).send({
-                  message: 'Erro ao enviar mensagem'
+                  message: 'Erro ao enviar mensagem',
+                  erro: err
                 })
               }
             }

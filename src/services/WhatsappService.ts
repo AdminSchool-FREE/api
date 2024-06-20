@@ -46,9 +46,8 @@ class WhatsappService {
     const response = await axiosClient.getAxiosInstance().post(
       'whatsapp/sendText', 
       {
-        number: numeroWhatsapp,
+        number: '55' + numeroWhatsapp,
         text: mensagem,
-        time_typing: 20000
       }, 
       {
         headers: {
@@ -57,6 +56,8 @@ class WhatsappService {
         }
       }
     )
+
+    console.log(response)
 
     return response.data
   }
@@ -69,10 +70,9 @@ class WhatsappService {
     const response = await axiosClient.getAxiosInstance().post(
       '/whatsapp/sendFile64', 
       {
-        number: this.numeroWhatsapp,
+        number: '55' + this.numeroWhatsapp,
         caption: mensagem,
         path: arquivoBase64,
-        time_typing: 20000 
       }, 
       {
         headers: {
