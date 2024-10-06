@@ -1,21 +1,20 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios'
 
-class AxiosClient{
-
+class AxiosClient {
   private baseUrl: string
 
-  constructor(baseUrl: string){
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl
   }
 
-  getAxiosInstance(): AxiosInstance{
+  getAxiosInstance(): AxiosInstance {
     return axios.create({
       baseURL: this.baseUrl,
       timeout: 30000,
       withCredentials: true,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     })
   }
 }

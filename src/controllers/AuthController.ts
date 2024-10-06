@@ -1,49 +1,49 @@
-import { FastifyInstance } from "fastify";
-import { z } from "zod";
+import { FastifyInstance } from 'fastify'
+import { z } from 'zod'
+
 import {
   consultarUsuario,
-  validarCredenciaisUsuario
-} from "../repositories/UsuarioRepository";
+  validarCredenciaisUsuario,
+} from '../repositories/UsuarioRepository'
 
 class AuthController {
-
   async inciarSessao(app: FastifyInstance) {
     const bodyCredenciais = z.object({
       email: z.string().email(),
-      senha: z.string().min(8)
+      senha: z.string().min(8),
     })
 
     app.post('/login', async (req, reply) => {
-      const { email, senha } = await bodyCredenciais.parseAsync(req.body);
+      const { email, senha } = await bodyCredenciais.parseAsync(req.body)
 
       const validaUsuario = await validarCredenciaisUsuario({
         email,
-        senha
+        senha,
       })
 
       if (validaUsuario) {
-        reply.status(202)
+        reply
+          .status(202)
           .setCookie('session-user', validaUsuario?.id, {
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 1,
-            domain: 'manstock.com.br',
+            domain: 'localhost',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
             httpOnly: true,
-            domain: 'manstock.com.br',
+            domain: 'localhost',
             maxAge: 60 * 60 * 24 * 1,
             path: '/',
           })
           .send({
             status: true,
-            mensagem: 'Usuário logado com sucesso'
+            mensagem: 'Usuário logado com sucesso',
           })
-      }
-      else {
+      } else {
         reply.status(401).send({
           status: false,
-          mensagem: 'Credenciais inválidas ou usuário desativado!'
+          mensagem: 'Credenciais inválidas ou usuário desativado!',
         })
       }
     })
@@ -54,16 +54,16 @@ class AuthController {
       const cookiesSession = req.cookies
 
       if (cookiesSession['session-user']) {
-        const dadosUsuario = await consultarUsuario(cookiesSession['session-user'])
+        const dadosUsuario = await consultarUsuario(
+          cookiesSession['session-user'],
+        )
 
         res.status(200).send(dadosUsuario)
-      }
-      else {
+      } else {
         res.status(401).send({
-          mensagem: 'Usuário não logado'
+          mensagem: 'Usuário não logado',
         })
       }
-
     })
   }
 }

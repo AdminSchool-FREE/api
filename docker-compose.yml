@@ -1,12 +1,11 @@
-version: '3.7'
+version: '4.1'
 
 services:
   bd-school:
-    image: mysql
+    image: mysql:lts
     command:
       [
-        "--default-authentication-plugin=mysql_native_password",
-        "--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION",
+        "--sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
       ]
     ports:
       - 3306:3306

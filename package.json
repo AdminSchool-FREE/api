@@ -9,19 +9,24 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup src ",
-    "lint": "eslint src --ext [.ts] --fix",
+    "lint": "eslint src --ext .ts --fix",
     "start": "node dist/index.cjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seeds/dev.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.9.1",
     "@rocketseat/eslint-config": "^2.2.2",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.12.12",
-    "eslint": "^9.3.0",
-    "prisma": "^5.14.0",
+    "eslint": "^8.57.0",
+    "prisma": "^5.20.0",
     "tsup": "^8.0.2",
     "tsx": "^4.10.5",
     "typescript": "^5.4.5"
@@ -30,9 +35,10 @@
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.1",
-    "@prisma/client": "5.14.0",
+    "@prisma/client": "5.20.0",
     "axios": "^1.7.0",
     "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
     "fastify": "^4.27.0",
     "zod": "^3.23.8"
   }

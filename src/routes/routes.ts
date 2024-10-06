@@ -1,47 +1,61 @@
-import { FastifyInstance } from "fastify";
-import EscolaController from "../controllers/EscolaController";
-import MensagemController from "../controllers/MensagemController";
-import AuthController from "../controllers/AuthController";
-import TurmaController from "../controllers/TurmaController";
-import ReportBugController from "../controllers/ReportController";
+import { FastifyInstance } from 'fastify'
+
+import AuthController from '../controllers/AuthController'
+import DiarioTurmaController from '../controllers/DiarioTurmaController'
+import EscolaController from '../controllers/EscolaController'
+import MensagemController from '../controllers/MensagemController'
+import ReportBugController from '../controllers/ReportController'
+import TurmaController from '../controllers/TurmaController'
 
 export const routesEscola = (server: FastifyInstance) => {
   const escolaController = new EscolaController()
 
   server.register(escolaController.criarEscola, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.adicionarUsuarioEscola, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.listarUsuariosEscola, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.alterarStatusUsuario, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.criarModeloMensagem, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.listarModelosMensagemEscola, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
   server.register(escolaController.removerModeloMensagem, {
-    prefix: 'escola'
+    prefix: 'escola',
   })
 
-  server.register(escolaController.buscarConfiguracoesApiWhatsapp,{
-    prefix: 'escola'
+  server.register(escolaController.buscarConfiguracoesApiWhatsapp, {
+    prefix: 'escola',
   })
 
   server.register(escolaController.configurarApiWhatsApp, {
-    prefix: 'escola'
+    prefix: 'escola',
+  })
+
+  server.register(escolaController.novaDisciplina, {
+    prefix: 'escola',
+  })
+
+  server.register(escolaController.listarDisciplinaEscola, {
+    prefix: 'escola',
+  })
+
+  server.register(escolaController.removerDisciplina, {
+    prefix: 'escola',
   })
 }
 
@@ -49,11 +63,11 @@ export const routesMensagemWhatsApp = (server: FastifyInstance) => {
   const mensagemController = new MensagemController()
 
   server.register(mensagemController.enviarMensagemResponsavelAluno, {
-    prefix: 'mensagem/whatsapp'
+    prefix: 'mensagem/whatsapp',
   })
 
-  server.register(mensagemController.buscarMensagensAluno,{
-    prefix:'mensagem/whatsapp'
+  server.register(mensagemController.buscarMensagensAluno, {
+    prefix: 'mensagem/whatsapp',
   })
 }
 
@@ -61,7 +75,19 @@ export const routesReportBug = (server: FastifyInstance) => {
   const reportController = new ReportBugController()
 
   server.register(reportController.reportarBug, {
-    prefix: 'reportar'
+    prefix: 'reportar',
+  })
+
+  server.register(reportController.relatorioEstatisticasEscola, {
+    prefix: 'relatorio',
+  })
+
+  server.register(reportController.relatorioFrequenciaEscolar, {
+    prefix: 'relatorio',
+  })
+
+  server.register(reportController.relatorioAvaliacoesAlunos, {
+    prefix: 'relatorio',
   })
 }
 
@@ -69,11 +95,11 @@ export const routesAuth = (server: FastifyInstance) => {
   const authController = new AuthController()
 
   server.register(authController.inciarSessao, {
-    prefix: 'auth'
+    prefix: 'auth',
   })
 
   server.register(authController.buscarDadosUsuario, {
-    prefix: 'auth'
+    prefix: 'auth',
   })
 }
 
@@ -81,38 +107,50 @@ export const routesTurma = (server: FastifyInstance) => {
   const turmaController = new TurmaController()
 
   server.register(turmaController.criarTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.listarTurmas, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.renomearTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.matricularAlunoTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.transferirAlunosTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.listarAlunosTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.transferirAlunoTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.excluirMatriculaAluno, {
-    prefix: 'turma'
+    prefix: 'turma',
   })
 
   server.register(turmaController.realizarChamadaTurma, {
-    prefix: 'turma'
+    prefix: 'turma',
+  })
+}
+
+export const routesDiarioTurma = (server: FastifyInstance) => {
+  const diarioTurmaController = new DiarioTurmaController()
+
+  server.register(diarioTurmaController.lancarNotasTurma, {
+    prefix: 'diario',
+  })
+
+  server.register(diarioTurmaController.buscarLancamentosTurma, {
+    prefix: 'diario',
   })
 }
