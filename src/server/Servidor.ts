@@ -1,10 +1,8 @@
-
 import fastifyCookie, { FastifyCookieOptions } from '@fastify/cookie'
 import cors from '@fastify/cors'
 import fastify, { FastifyInstance } from 'fastify'
 
 class Servidor {
-
   private servico: FastifyInstance
   private host: string
   private port: number
@@ -26,7 +24,6 @@ class Servidor {
     this.servico.register(fastifyCookie, {
       secret: process.env.COOKIE_SECRET,
       hook: 'onRequest',
-      
     } as FastifyCookieOptions)
   }
 
