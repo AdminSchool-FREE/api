@@ -2,9 +2,16 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
+  buscarResponsaveisAlunos,
+  inserirNotificacoes,
+  NovaNotificacaoProps,
+} from '../repositories/AlunoRepository'
+import {
   buscarLancamentosNotasAtividadeTurma,
   inserirNotaAtividadeTurma,
 } from '../repositories/DiarioRepository'
+import { buscarConfiguracoesApiWhatsapp } from '../repositories/EscolaRepository'
+import WhatsAppChatPro from '../services/whatsapp/WhatsAppChatPro'
 
 class DiarioTurmaController {
   async lancarNotasTurma(app: FastifyInstance) {
@@ -42,10 +49,70 @@ class DiarioTurmaController {
             }),
           })
 
-          res.status(201).send({
-            status: true,
-            msg: 'Notas lançadas com sucesso!',
-          })
+          if (notasTurma.length > 0) {
+            const listaResponsaveis = await buscarResponsaveisAlunos(
+              notasTurma.map((aluno) => aluno.idAluno),
+            )
+
+            const mensagens: Array<NovaNotificacaoProps> = []
+            const disparos: Array<unknown> = []
+
+            if (listaResponsaveis) {
+              const configuracoesEscola =
+                await buscarConfiguracoesApiWhatsapp(idEscola)
+
+              if (
+                configuracoesEscola?.token_api_whatsapp &&
+                configuracoesEscola?.token_dispositivo_api_whatsapp
+              ) {
+                const servicoWhatsapp = new WhatsAppChatPro(
+                  configuracoesEscola?.token_api_whatsapp,
+                  configuracoesEscola?.token_dispositivo_api_whatsapp,
+                )
+
+                listaResponsaveis.forEach((responsaveisAluno) => {
+                  responsaveisAluno.responsavel.TelefoneResponsavel.forEach(
+                    (contato) => {
+                      const contatoResponsavel = contato.ddd + contato.telefone
+
+                      const notaAvaliacao = notasTurma.find(
+                        (nota) => responsaveisAluno.aluno.id === nota.idAluno,
+                      )
+
+                      const mensagem = `Prezado(a) responsável, o aluno(a) ${responsaveisAluno.aluno.nome} recebeu nota ${notaAvaliacao?.nota ?? 0} de ${notaAvaliacao?.descricao ?? ''}`
+
+                      disparos.push(
+                        servicoWhatsapp.enviarMensagem({
+                          numeroDestinatario: contatoResponsavel,
+                          mensagem,
+                        }),
+                      )
+
+                      mensagens.push({
+                        enviadoEm: new Date(),
+                        idAluno: responsaveisAluno.aluno.id,
+                        idResponsavel: responsaveisAluno.responsavel.id,
+                        mensagem,
+                      })
+                    },
+                  )
+                })
+
+                await Promise.all(disparos)
+                await inserirNotificacoes(mensagens)
+              }
+            }
+
+            res.status(201).send({
+              status: true,
+              msg: 'Notas lançadas com sucesso!',
+            })
+          } else {
+            res.status(200).send({
+              status: false,
+              msg: 'Nenhuma nota lançada.',
+            })
+          }
         } catch (error) {
           res.status(500).send({
             status: false,
