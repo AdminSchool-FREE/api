@@ -17,11 +17,10 @@ class ReportBugController {
   async reportarBug(app: FastifyInstance) {
     const schemaBodyReport = z.object({
       problema: z.string(),
-      imagem: z.string().optional(),
     })
 
     app.post('/', async (req, res) => {
-      const { problema, imagem } = await schemaBodyReport.parseAsync(req.body)
+      const { problema } = await schemaBodyReport.parseAsync(req.body)
 
       const cookieSession = req.cookies
       const idEscola = cookieSession['session-company']
@@ -47,7 +46,6 @@ class ReportBugController {
               const mensagemProblema = `${dadosEscola.nome}\n` + problema
               const reportBug = await inserirBug({
                 problema: mensagemProblema,
-                imagem,
                 idEscola,
               })
 
