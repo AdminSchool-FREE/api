@@ -1,51 +1,63 @@
-import { prisma } from "../libraries/PrismaClient"
+import { prisma } from '../libraries/PrismaClient'
 
-export interface NovoAlunoProps{
+export interface NovoAlunoProps {
   nome: string
-  cpf: string,
-  ra: string,
-  rg: string,
-  dataNascimento: Date,
-  idTurma: string,
-  nomeResponsavel: string,
-  cpfResponsavel: string,
+  cpf: string
+  ra: string
+  rg: string
+  dataNascimento: Date
+  idTurma: string
+  nomeResponsavel: string
+  cpfResponsavel: string
   telefones: Array<{
-    ddd: string,
-    telefone: string,
+    ddd: string
+    telefone: string
     whatsapp: boolean
   }>
 }
 
-export interface NovaNotificacaoProps{
-  mensagem: string,
-  idResponsavel: string,
-  idAluno: string,
+export interface NovaNotificacaoProps {
+  mensagem: string
+  idResponsavel: string
+  idAluno: string
   enviadoEm: Date
 }
 
-export async function listarAlunosTurmaEscola(idEscola: string, idTurma: string){
+export async function listarAlunosTurmaEscola(
+  idEscola: string,
+  idTurma: string,
+) {
   const alunos = await prisma.aluno.findMany({
     where: {
       turma: {
         id: idTurma,
-        idEscola
-      }
-    }
+        idEscola,
+      },
+    },
   })
 
   return alunos
 }
 
-
-export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, idTurma, nomeResponsavel, cpfResponsavel, telefones}: NovoAlunoProps){
+export async function matricularNovoAluno({
+  nome,
+  cpf,
+  ra,
+  rg,
+  dataNascimento,
+  idTurma,
+  nomeResponsavel,
+  cpfResponsavel,
+  telefones,
+}: NovoAlunoProps) {
   const verificaExisteResponsavel = await prisma.responsavel.findUnique({
     where: {
-      cpf: cpfResponsavel
-    }
+      cpf: cpfResponsavel,
+    },
   })
 
-  if(verificaExisteResponsavel){
-    const aluno =await prisma.responsavelAluno.create({
+  if (verificaExisteResponsavel) {
+    const aluno = await prisma.responsavelAluno.create({
       select: {
         aluno: {
           select: {
@@ -55,9 +67,9 @@ export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, id
             ra: true,
             rg: true,
             dataNascimento: true,
-            idTurma: true
-          }
-        }
+            idTurma: true,
+          },
+        },
       },
       data: {
         aluno: {
@@ -72,15 +84,14 @@ export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, id
         },
         responsavel: {
           connect: {
-            id: verificaExisteResponsavel.id
-          }
-        }
-      }
+            id: verificaExisteResponsavel.id,
+          },
+        },
+      },
     })
 
     return aluno.aluno
-  }
-  else{
+  } else {
     const aluno = await prisma.responsavelAluno.create({
       select: {
         aluno: {
@@ -91,9 +102,9 @@ export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, id
             ra: true,
             rg: true,
             dataNascimento: true,
-            idTurma: true
-          }
-        }
+            idTurma: true,
+          },
+        },
       },
       data: {
         aluno: {
@@ -112,19 +123,22 @@ export async function matricularNovoAluno({nome, cpf, ra, rg, dataNascimento, id
             cpf: cpfResponsavel,
             TelefoneResponsavel: {
               createMany: {
-                data: telefones
-              }
-            }
-          }
-        }
+                data: telefones,
+              },
+            },
+          },
+        },
       },
     })
-  
+
     return aluno.aluno
   }
 }
 
-export async function salvarTransferenciaAlunoTurma(idAluno: string, idTurma: string){
+export async function salvarTransferenciaAlunoTurma(
+  idAluno: string,
+  idTurma: string,
+) {
   const aluno = await prisma.aluno.update({
     select: {
       id: true,
@@ -139,55 +153,58 @@ export async function salvarTransferenciaAlunoTurma(idAluno: string, idTurma: st
       id: idAluno,
     },
     data: {
-      idTurma
-    }
+      idTurma,
+    },
   })
 
   return aluno
 }
 
-export async function salvarTransferenciasAlunosTurma(idsAlunos: Array<string>, idTurma: string){
+export async function salvarTransferenciasAlunosTurma(
+  idsAlunos: Array<string>,
+  idTurma: string,
+) {
   const alunos = await prisma.aluno.updateMany({
     where: {
       id: {
-        in: idsAlunos
+        in: idsAlunos,
       },
     },
     data: {
-      idTurma
-    }
+      idTurma,
+    },
   })
 
   return alunos
 }
 
-export async function excluirMatricula(idAluno: string, idEscola: string){
-
+export async function excluirMatricula(idAluno: string, idEscola: string) {
   const deletaRegistrosChamadaAluno = prisma.chamadaTurma.deleteMany({
     where: {
-      idAluno
-    }
+      idAluno,
+    },
   })
 
-  const deletaNotificacoesResponsavelAluno = prisma.notificacaoResponsavelAluno.deleteMany({
-    where: {
-      idAluno,
-    }
-  })
+  const deletaNotificacoesResponsavelAluno =
+    prisma.notificacaoResponsavelAluno.deleteMany({
+      where: {
+        idAluno,
+      },
+    })
 
   const deletaResponsavelAluno = prisma.responsavelAluno.deleteMany({
     where: {
       idAluno,
-    }
+    },
   })
 
   const deletaAluno = prisma.aluno.delete({
     where: {
       id: idAluno,
       turma: {
-        idEscola
-      }
-    }
+        idEscola,
+      },
+    },
   })
 
   return await prisma.$transaction([
@@ -198,13 +215,13 @@ export async function excluirMatricula(idAluno: string, idEscola: string){
   ])
 }
 
-export async function buscarDadosResponsavelAluno(idAluno: string){
+export async function buscarDadosResponsavelAluno(idAluno: string) {
   const responsaveisAluno = await prisma.responsavelAluno.findMany({
     select: {
       aluno: {
         select: {
-          id: true
-        }
+          id: true,
+        },
       },
       responsavel: {
         select: {
@@ -214,34 +231,34 @@ export async function buscarDadosResponsavelAluno(idAluno: string){
             select: {
               ddd: true,
               telefone: true,
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
     where: {
       idAluno,
       responsavel: {
         TelefoneResponsavel: {
           every: {
-            whatsapp: true
-          }
-        }
-      }
-    }
+            whatsapp: true,
+          },
+        },
+      },
+    },
   })
 
   return responsaveisAluno
 }
 
-export async function buscarResponsaveisAlunos(alunos: Array<string>){
+export async function buscarResponsaveisAlunos(alunos: Array<string>) {
   const responsaveisAlunos = await prisma.responsavelAluno.findMany({
     select: {
       aluno: {
         select: {
           id: true,
           nome: true,
-        }
+        },
       },
       responsavel: {
         select: {
@@ -251,49 +268,54 @@ export async function buscarResponsaveisAlunos(alunos: Array<string>){
             select: {
               ddd: true,
               telefone: true,
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
     where: {
       idAluno: {
-        in: alunos
+        in: alunos,
+      },
+      aluno: {
+        notificacaoBloqueado: false,
       },
       responsavel: {
         TelefoneResponsavel: {
           every: {
-            whatsapp: true
-          }
-        }
-      }
-    }
+            whatsapp: true,
+          },
+        },
+      },
+    },
   })
 
   return responsaveisAlunos
 }
 
-export async function inserirNotificacoes(notificacoes: Array<NovaNotificacaoProps>){
+export async function inserirNotificacoes(
+  notificacoes: Array<NovaNotificacaoProps>,
+) {
   const notificacao = await prisma.notificacaoResponsavelAluno.createMany({
-    data: notificacoes
+    data: notificacoes,
   })
 
   return notificacao
 }
 
-export async function buscarNotificacoesReponsaveisAluno(idAluno: string){
+export async function buscarNotificacoesReponsaveisAluno(idAluno: string) {
   const listaNotificacoes = await prisma.notificacaoResponsavelAluno.findMany({
     select: {
       id: true,
       mensagem: true,
-      enviadoEm: true
+      enviadoEm: true,
     },
     where: {
-      idAluno
+      idAluno,
     },
     orderBy: {
-      enviadoEm: 'asc'
-    }
+      enviadoEm: 'asc',
+    },
   })
 
   return listaNotificacoes

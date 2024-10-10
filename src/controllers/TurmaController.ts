@@ -2,23 +2,19 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
-  buscarResponsaveisAlunos,
   excluirMatricula,
-  inserirNotificacoes,
   listarAlunosTurmaEscola,
   matricularNovoAluno,
-  NovaNotificacaoProps,
   salvarTransferenciaAlunoTurma,
   salvarTransferenciasAlunosTurma,
 } from '../repositories/AlunoRepository'
-import { buscarConfiguracoesApiWhatsapp } from '../repositories/EscolaRepository'
 import {
   alterarNomeTurma,
   inserirTurma,
   listarTurmasEscola,
   salvarChamadaTurma,
 } from '../repositories/TurmaRepository'
-import WhatsAppChatPro from '../services/whatsapp/WhatsAppChatPro'
+import MensageriaService from '../services/MensageriaService'
 
 class TurmaController {
   async criarTurma(app: FastifyInstance) {
@@ -322,64 +318,26 @@ class TurmaController {
         const listaAlunosAusentes = chamada.filter((aluno) => !aluno.presente)
 
         if (listaAlunosAusentes.length > 0) {
-          const listaResponsaveis = await buscarResponsaveisAlunos(
+          const notificarResponsaveis = new MensageriaService(
             listaAlunosAusentes.map((aluno) => aluno.idAluno),
+            idEscola,
           )
 
-          const mensagens: Array<NovaNotificacaoProps> = []
-          const disparos: Array<unknown> = []
+          const notificacaoResponsaveis =
+            await notificarResponsaveis.dispararNotificacaoAusencia({
+              modeloMensagem: `Prezado(a) responsável, o aluno(a) $nomeAluno não compareceu à aula hoje.`,
+            })
 
-          if (listaResponsaveis) {
-            const configuracoesEscola =
-              await buscarConfiguracoesApiWhatsapp(idEscola)
-
-            if (
-              configuracoesEscola?.token_api_whatsapp &&
-              configuracoesEscola?.token_dispositivo_api_whatsapp
-            ) {
-              const servicoWhatsapp = new WhatsAppChatPro(
-                configuracoesEscola?.token_api_whatsapp,
-                configuracoesEscola?.token_dispositivo_api_whatsapp,
-              )
-
-              listaResponsaveis.forEach((responsaveisAluno) => {
-                responsaveisAluno.responsavel.TelefoneResponsavel.forEach(
-                  (contato) => {
-                    const contatoResponsavel = contato.ddd + contato.telefone
-
-                    const mensagem = `Prezado(a) responsável, o aluno(a) ${responsaveisAluno.aluno.nome} não compareceu à aula hoje.`
-
-                    disparos.push(
-                      servicoWhatsapp.enviarMensagem({
-                        numeroDestinatario: contatoResponsavel,
-                        mensagem,
-                      }),
-                    )
-
-                    mensagens.push({
-                      enviadoEm: new Date(),
-                      idAluno: responsaveisAluno.aluno.id,
-                      idResponsavel: responsaveisAluno.responsavel.id,
-                      mensagem,
-                    })
-                  },
-                )
-              })
-
-              try {
-                await Promise.all(disparos)
-                await inserirNotificacoes(mensagens)
-
-                res.status(200).send({
-                  message: 'Chamada salvo com sucesso',
-                })
-              } catch (err) {
-                res.status(500).send({
-                  message: 'Erro ao enviar mensagem',
-                  error: err,
-                })
-              }
-            }
+          if (notificacaoResponsaveis.status) {
+            res.status(201).send({
+              status: true,
+              msg: 'Chamada salvo com sucesso!',
+            })
+          } else {
+            res.status(200).send({
+              status: false,
+              msg: 'Não foi possível notificar os responsáveis.',
+            })
           }
         }
       } else {

@@ -175,3 +175,18 @@ export async function excluirDisciplina({
     },
   })
 }
+
+export async function buscarNomeDisciplina({
+  idDisciplina,
+  idEscola,
+}: RemoverDisciplinaEscolaProps) {
+  return await prisma.disciplina.findUniqueOrThrow({
+    where: {
+      id: idDisciplina,
+      idEscola,
+    },
+    select: {
+      nome: true,
+    },
+  })
+}

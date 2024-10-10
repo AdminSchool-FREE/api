@@ -7,6 +7,7 @@ export interface NovaNotaAtividadeAlunosProps {
     tipoPeriodo: 'mensal' | 'bimestral' | 'trimestral' | 'semestral'
     periodo: string
     descricao: string
+    realizadoEm: Date
   }>
 }
 

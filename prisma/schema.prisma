@@ -72,6 +72,7 @@ model Aluno {
   ra                          String                        @unique
   rg                          String                        @unique
   dataNascimento              DateTime                      @db.Date
+  notificacaoBloqueado        Boolean                       @default(false)
   idTurma                     String
   turma                       Turma                         @relation(fields: [idTurma], references: [id])
   ResponsavelAluno            ResponsavelAluno[]
@@ -142,6 +143,7 @@ model NotasProvas {
   periodo      String
   lancamento   DateTime    @default(now())
   descricao    String
+  realizadoEm  DateTime?   @db.Date
   idAluno      String
   aluno        Aluno       @relation(fields: [idAluno], references: [id], onDelete: Cascade, onUpdate: Cascade)
   idDisciplina String
