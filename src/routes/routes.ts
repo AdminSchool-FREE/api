@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify'
 import AuthController from '../controllers/AuthController'
 import DiarioTurmaController from '../controllers/DiarioTurmaController'
 import EscolaController from '../controllers/EscolaController'
+import MatriculaAlunoController from '../controllers/MatriculaAlunoController'
 import MensagemController from '../controllers/MensagemController'
 import ReportBugController from '../controllers/ReportController'
 import TurmaController from '../controllers/TurmaController'
@@ -152,5 +153,49 @@ export const routesDiarioTurma = (server: FastifyInstance) => {
 
   server.register(diarioTurmaController.buscarLancamentosTurma, {
     prefix: 'diario',
+  })
+}
+
+export const routesMatriculas = (server: FastifyInstance) => {
+  const matriculaController = new MatriculaAlunoController()
+
+  server.register(matriculaController.consultarDadosMatriculaAluno, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.verificarExisteResponsavel, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.alterarStatusBloqueioNotificacao, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.excluirContatoTelefonicoResponsavel, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.atualizarDadosAluno, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.atualizarDadosResponsavel, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.vincularNovoResponsavelAluno, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.excluirVinculoResponsavelAluno, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.adicionarNovosContatos, {
+    prefix: 'matricula',
+  })
+
+  server.register(matriculaController.atualizarPermissaoNotificacaoContato, {
+    prefix: 'matricula',
   })
 }

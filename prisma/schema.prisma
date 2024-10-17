@@ -93,7 +93,7 @@ model Responsavel {
 model TelefoneResponsavel {
   id            String      @id @default(uuid())
   ddd           String
-  telefone      String      @unique
+  telefone      String      
   whatsapp      Boolean     @default(true)
   idResponsavel String
   responsavel   Responsavel @relation(fields: [idResponsavel], references: [id])

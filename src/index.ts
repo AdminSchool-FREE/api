@@ -2,6 +2,7 @@ import {
   routesAuth,
   routesDiarioTurma,
   routesEscola,
+  routesMatriculas,
   routesMensagemWhatsApp,
   routesReportBug,
   routesTurma,
@@ -19,5 +20,6 @@ routesAuth(server.getServico())
 routesTurma(server.getServico())
 routesReportBug(server.getServico())
 routesDiarioTurma(server.getServico())
+routesMatriculas(server.getServico())
 
 server.inicializar()
