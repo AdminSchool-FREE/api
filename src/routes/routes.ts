@@ -154,6 +154,10 @@ export const routesDiarioTurma = (server: FastifyInstance) => {
   server.register(diarioTurmaController.buscarLancamentosTurma, {
     prefix: 'diario',
   })
+
+  server.register(diarioTurmaController.alterarNotaAtividade, {
+    prefix: 'diario',
+  })
 }
 
 export const routesMatriculas = (server: FastifyInstance) => {

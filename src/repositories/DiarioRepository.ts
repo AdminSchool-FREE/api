@@ -1,4 +1,5 @@
 import {
+  AtualizaAtividadeAlunoProps,
   FiltroNotaAtividadeProps,
   NovaNotaAtividadeAlunosProps,
 } from '../interfaces/DiarioTurmaInterface'
@@ -25,11 +26,14 @@ export async function buscarLancamentosNotasAtividadeTurma({
       id: true,
       aluno: {
         select: {
+          id: true,
           nome: true,
+          idTurma: true,
         },
       },
       disciplina: {
         select: {
+          id: true,
           nome: true,
         },
       },
@@ -51,6 +55,26 @@ export async function buscarLancamentosNotasAtividadeTurma({
       periodo,
       tipoPeriodo,
       idDisciplina,
+    },
+  })
+}
+
+export async function atualizarNotaAtividadeAluno({
+  nota,
+}: AtualizaAtividadeAlunoProps) {
+  return await prisma.notasProvas.update({
+    data: {
+      nota: nota.nota,
+      realizadoEm: nota.realizadoEm,
+      idDisciplina: nota.idDisciplina,
+      periodo: nota.periodo,
+      tipoPeriodo: nota.tipoPeriodo,
+      ano: nota.ano,
+      descricao: nota.descricao,
+    },
+    where: {
+      id: nota.id,
+      idAluno: nota.idAluno,
     },
   })
 }

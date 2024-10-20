@@ -4,6 +4,7 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
+  atualizarNotaAtividadeAluno,
   buscarLancamentosNotasAtividadeTurma,
   inserirNotaAtividadeTurma,
 } from '../repositories/DiarioRepository'
@@ -151,7 +152,10 @@ class DiarioTurmaController {
             dados: lancamentos.map((lancamento) => {
               return {
                 id: lancamento.id,
+                turmaId: lancamento.aluno.idTurma,
+                alunoId: lancamento.aluno.id,
                 aluno: lancamento.aluno.nome,
+                disciplinaId: lancamento.disciplina.id,
                 disciplina: lancamento.disciplina.nome,
                 ano: lancamento.ano,
                 tipoPeriodo: lancamento.tipoPeriodo,
@@ -167,6 +171,76 @@ class DiarioTurmaController {
           res.status(500).send({
             status: false,
             msg: 'Falha ao consultar os lançamentos: ' + error,
+          })
+        }
+      } else {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+      }
+    })
+  }
+
+  async alterarNotaAtividade(app: FastifyInstance) {
+    const schemaParam = z.object({
+      id: z.string().uuid(),
+    })
+
+    const schemaBody = z.object({
+      idAluno: z.string().uuid(),
+      idDisciplina: z.string().uuid(),
+      nota: z.coerce.number().min(0).max(10),
+      ano: z.string().length(4),
+      tipoPeriodo: z.enum(['mensal', 'bimestral', 'trimestral', 'semestral']),
+      periodo: z.string(),
+      descricao: z.string(),
+      realizadoEm: z.coerce.date(),
+    })
+
+    app.put('/lancamento/:id', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (idEscola) {
+        const { id } = await schemaParam.parseAsync(req.params)
+
+        const {
+          idAluno,
+          idDisciplina,
+          nota,
+          ano,
+          tipoPeriodo,
+          periodo,
+          descricao,
+          realizadoEm,
+        } = await schemaBody.parseAsync(req.body)
+        try {
+          const atualizaDados = await atualizarNotaAtividadeAluno({
+            nota: {
+              id,
+              idAluno,
+              idDisciplina,
+              nota,
+              ano,
+              tipoPeriodo,
+              periodo,
+              descricao,
+              realizadoEm,
+            },
+          })
+
+          res.status(200).send({
+            status: true,
+            msg: 'Nota atualizado com sucesso!',
+            dados: atualizaDados,
+          })
+        } catch (error) {
+          res.status(500).send({
+            status: false,
+            msg: 'Falha ao atualizar a nota',
+            data: null,
+            error,
           })
         }
       } else {
