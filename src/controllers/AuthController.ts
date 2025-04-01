@@ -27,12 +27,12 @@ class AuthController {
           .setCookie('session-user', validaUsuario?.id, {
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 1,
-            domain: 'manstock.com.br',
+            // domain: 'manstock.com.br',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
             httpOnly: true,
-            domain: 'manstock.com.br',
+            // domain: 'manstock.com.br',
             maxAge: 60 * 60 * 24 * 1,
             path: '/',
           })

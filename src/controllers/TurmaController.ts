@@ -288,6 +288,7 @@ class TurmaController {
         z.object({
           idAluno: z.string().uuid(),
           presente: z.boolean().default(false),
+          dataChamada: z.coerce.date()
         }),
       ),
     })
@@ -304,7 +305,7 @@ class TurmaController {
             return {
               idAluno: aluno.idAluno,
               presenca: aluno.presente,
-              dataChamada: new Date(),
+              dataChamada: aluno.dataChamada,
             }
           })
 
