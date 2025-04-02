@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
@@ -27,12 +27,12 @@ class AuthController {
           .setCookie('session-user', validaUsuario?.id, {
             httpOnly: true,
             maxAge: 60 * 60 * 24 * 1,
-            // domain: 'manstock.com.br',
+            domain: 'manstock.com.br',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
             httpOnly: true,
-            // domain: 'manstock.com.br',
+            domain: 'manstock.com.br',
             maxAge: 60 * 60 * 24 * 1,
             path: '/',
           })
@@ -55,7 +55,7 @@ class AuthController {
 
       if (cookiesSession['session-user']) {
         const dadosUsuario = await consultarUsuario(
-          cookiesSession['session-user'],
+          cookiesSession['session-user']
         )
 
         res.status(200).send(dadosUsuario)
