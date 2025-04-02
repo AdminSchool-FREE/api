@@ -1,3 +1,5 @@
+import { $Enums } from "@prisma/client"
+
 export interface InserirEscolaProps {
   nomeEscola: string
   nomeUsuario: string
@@ -9,6 +11,7 @@ export interface InserirUsuarioEscolaProps {
   nome: string
   email: string
   senha: string
+  perfil: 'ADMIN'|'PROFESSOR'
   status: boolean
   idEscola: string
 }

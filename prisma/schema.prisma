@@ -10,6 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PerfilUsuario {
+  ADMIN
+  PROFESSOR
+}
+
 model Escola {
   id             String           @id @default(uuid())
   nome           String
@@ -22,21 +27,23 @@ model Escola {
 }
 
 model Turma {
-  id       String  @id @default(uuid())
-  nome     String
-  idEscola String
-  escola   Escola  @relation(fields: [idEscola], references: [id])
-  Aluno    Aluno[]
+  id                String              @id @default(uuid())
+  nome              String
+  idEscola          String
+  escola            Escola              @relation(fields: [idEscola], references: [id])
+  Aluno             Aluno[]
+  ConteudoAulaTurma ConteudoAulaTurma[]
 }
 
 model Usuario {
-  id       String  @id @default(uuid())
+  id       String        @id @default(uuid())
   nome     String
-  email    String  @unique
+  email    String        @unique
   senha    String
-  status   Boolean @default(true)
+  status   Boolean       @default(true)
+  perfil   PerfilUsuario @default(PROFESSOR)
   idEscola String
-  escola   Escola  @relation(fields: [idEscola], references: [id])
+  escola   Escola        @relation(fields: [idEscola], references: [id])
 }
 
 model ModeloMensagem {
@@ -93,7 +100,7 @@ model Responsavel {
 model TelefoneResponsavel {
   id            String      @id @default(uuid())
   ddd           String
-  telefone      String      
+  telefone      String
   whatsapp      Boolean     @default(true)
   idResponsavel String
   responsavel   Responsavel @relation(fields: [idResponsavel], references: [id])
@@ -121,18 +128,19 @@ model NotificacaoResponsavelAluno {
 
 model ChamadaTurma {
   id          String   @id @default(uuid())
-  dataChamada DateTime
+  dataChamada DateTime @db.Date
   presenca    Boolean  @default(true)
   idAluno     String
   aluno       Aluno    @relation(fields: [idAluno], references: [id])
 }
 
 model Disciplina {
-  id          String        @id @default(uuid())
-  nome        String
-  idEscola    String
-  escola      Escola        @relation(fields: [idEscola], references: [id])
-  NotasProvas NotasProvas[]
+  id                String              @id @default(uuid())
+  nome              String
+  idEscola          String
+  escola            Escola              @relation(fields: [idEscola], references: [id])
+  NotasProvas       NotasProvas[]
+  ConteudoAulaTurma ConteudoAulaTurma[]
 }
 
 model NotasProvas {
@@ -148,6 +156,17 @@ model NotasProvas {
   aluno        Aluno       @relation(fields: [idAluno], references: [id], onDelete: Cascade, onUpdate: Cascade)
   idDisciplina String
   disciplina   Disciplina  @relation(fields: [idDisciplina], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model ConteudoAulaTurma {
+  id           String     @id @default(uuid())
+  descricao    String     @db.LongText
+  realizadoEm  DateTime?  @db.Date
+  lancamento   DateTime   @default(now())
+  idTurma      String
+  turma        Turma      @relation(fields: [idTurma], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  idDisciplina String
+  disciplina   Disciplina @relation(fields: [idDisciplina], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 enum TipoPeriodo {

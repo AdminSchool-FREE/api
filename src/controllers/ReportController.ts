@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
@@ -37,13 +37,13 @@ class ReportBugController {
           ) {
             const servicoWhatsapp = new WhatsAppChatPro(
               configuracoesEscola?.token_api_whatsapp,
-              configuracoesEscola?.token_dispositivo_api_whatsapp,
+              configuracoesEscola?.token_dispositivo_api_whatsapp
             )
 
             const dadosEscola = await buscarDadosEscola(idEscola)
 
             if (dadosEscola) {
-              const mensagemProblema = `${dadosEscola.nome}\n` + problema
+              const mensagemProblema = `${dadosEscola.nome}\n${problema}`
               const reportBug = await inserirBug({
                 problema: mensagemProblema,
                 idEscola,
@@ -134,7 +134,7 @@ class ReportBugController {
 
     app.get('/frequencia', async (req, res) => {
       const { inicio, fim, turma } = await schemaParamsFilters.parseAsync(
-        req.query,
+        req.query
       )
 
       const cookieSession = req.cookies

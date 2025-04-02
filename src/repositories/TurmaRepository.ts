@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import { prisma } from '../libraries/PrismaClient'
 
 interface NovaTurmaProps {
@@ -69,4 +70,17 @@ export async function salvarChamadaTurma(
   return await prisma.chamadaTurma.createMany({
     data: dadosChamada,
   })
+}
+
+export async function historicoFrequenciaAlunosTurma({ turmaId, dataLetivo, escolaId }: { escolaId: string, turmaId: string, dataLetivo: Date }) {
+
+  return await prisma.$queryRaw`SELECT ChamadaTurma.id, Aluno.nome, dataChamada, idAluno, presenca
+    from ChamadaTurma 
+    join Aluno on Aluno.id = ChamadaTurma.idAluno
+    join Turma on Aluno.idTurma = Turma.id
+    where Turma.idEscola = ${escolaId} 
+    AND DATE(ChamadaTurma.dataChamada) = ${format(dataLetivo, 'yyyy-MM-dd')}
+    AND Aluno.idTurma = ${turmaId}
+    ORDER BY Aluno.nome ASC
+  `
 }

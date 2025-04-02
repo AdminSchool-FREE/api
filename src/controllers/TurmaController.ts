@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
@@ -10,6 +10,7 @@ import {
 } from '../repositories/AlunoRepository'
 import {
   alterarNomeTurma,
+  historicoFrequenciaAlunosTurma,
   inserirTurma,
   listarTurmasEscola,
   salvarChamadaTurma,
@@ -148,7 +149,7 @@ class TurmaController {
         }),
         {
           required_error: 'O telefone é obrigatório',
-        },
+        }
       ),
     })
 
@@ -224,7 +225,7 @@ class TurmaController {
       alunos: z.array(
         z.object({
           id: z.string().uuid(),
-        }),
+        })
       ),
       idTurma: z.string().uuid(),
     })
@@ -234,13 +235,13 @@ class TurmaController {
 
       if (cookieSession['session-company']) {
         const { alunos, idTurma } = await bodyTransferencias.parseAsync(
-          req.body,
+          req.body
         )
 
         try {
           await salvarTransferenciasAlunosTurma(
-            alunos.map((aluno) => aluno.id),
-            idTurma,
+            alunos.map(aluno => aluno.id),
+            idTurma
           )
 
           res.status(200).send({
@@ -288,8 +289,8 @@ class TurmaController {
         z.object({
           idAluno: z.string().uuid(),
           presente: z.boolean().default(false),
-          dataChamada: z.coerce.date()
-        }),
+          dataChamada: z.coerce.date(),
+        })
       ),
     })
 
@@ -301,7 +302,7 @@ class TurmaController {
 
       if (idEscola) {
         try {
-          const dadosChamada = chamada.map((aluno) => {
+          const dadosChamada = chamada.map(aluno => {
             return {
               idAluno: aluno.idAluno,
               presenca: aluno.presente,
@@ -316,17 +317,17 @@ class TurmaController {
           })
         }
 
-        const listaAlunosAusentes = chamada.filter((aluno) => !aluno.presente)
+        const listaAlunosAusentes = chamada.filter(aluno => !aluno.presente)
 
         if (listaAlunosAusentes.length > 0) {
           const notificarResponsaveis = new MensageriaService(
-            listaAlunosAusentes.map((aluno) => aluno.idAluno),
-            idEscola,
+            listaAlunosAusentes.map(aluno => aluno.idAluno),
+            idEscola
           )
 
           const notificacaoResponsaveis =
             await notificarResponsaveis.dispararNotificacaoAusencia({
-              modeloMensagem: `Prezado(a) responsável, o aluno(a) $nomeAluno não compareceu à aula hoje.`,
+              modeloMensagem: 'Prezado(a) responsável, o aluno(a) $nomeAluno não compareceu à aula hoje.',
             })
 
           if (notificacaoResponsaveis.status) {
@@ -346,6 +347,47 @@ class TurmaController {
           message: 'Sessão encerrada!',
         })
       }
+    })
+  }
+
+  async historicoFrequenciaTurma(app: FastifyInstance) {
+    const schemaParam = z.object({
+      turma: z.string().uuid(),
+    })
+
+    const schemaQueryParam = z.object({
+      dataChamada: z.coerce.date(),
+    })
+
+    app.get('/chamada/:turma', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      const { turma } = await schemaParam.parseAsync(req.params)
+      const { dataChamada } = await schemaQueryParam.parseAsync(req.query)
+
+      const historicoFrequencia = await historicoFrequenciaAlunosTurma({
+        escolaId: idEscola,
+        turmaId: turma,
+        dataLetivo: dataChamada
+      }) as Array<{
+        id: string,
+        idAluno: string,
+        nome: string,
+        dataChamada: Date,
+        presenca: boolean
+      }>
+
+      res.status(200).send(historicoFrequencia)
     })
   }
 }

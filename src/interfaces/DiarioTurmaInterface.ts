@@ -36,3 +36,23 @@ export interface FiltroNotaAtividadeProps {
   periodo?: string
   tipoPeriodo?: 'mensal' | 'bimestral' | 'trimestral' | 'semestral'
 }
+
+export interface NovoConteudoAulaTurmaProps {
+  descricao: string
+  realizadoEm: Date
+  idTurma: string
+  idDisciplina: string
+}
+
+export interface RemoverConteudoAulaTurmaProps {
+  id: string
+}
+
+export interface FiltroConteudoAulaTurmaProps {
+  idEscola: string
+  idTurma: string
+  periodo: {
+    inicio: Date,
+    fim: Date
+  }
+}

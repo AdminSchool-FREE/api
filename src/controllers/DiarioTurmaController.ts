@@ -1,12 +1,15 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
   atualizarNotaAtividadeAluno,
+  buscarConteudosAulaTurma,
   buscarLancamentosNotasAtividadeTurma,
+  inserirConteudoAulaTurma,
   inserirNotaAtividadeTurma,
+  removeConteudoAulaTurma,
 } from '../repositories/DiarioRepository'
 import { buscarNomeDisciplina } from '../repositories/EscolaRepository'
 import MensageriaService from '../services/MensageriaService'
@@ -23,7 +26,7 @@ class DiarioTurmaController {
         periodo: z.string(),
         descricao: z.string(),
         realizadoEm: z.coerce.date(),
-      }),
+      })
     )
 
     app.post('/lancamento', async (req, res) => {
@@ -35,7 +38,7 @@ class DiarioTurmaController {
       if (idEscola) {
         try {
           await inserirNotaAtividadeTurma({
-            notasAtividade: notasTurma.map((aluno) => {
+            notasAtividade: notasTurma.map(aluno => {
               return {
                 idAluno: aluno.idAluno,
                 idDisciplina: aluno.idDisciplina,
@@ -51,8 +54,8 @@ class DiarioTurmaController {
 
           if (notasTurma.length > 0) {
             const notificarResponsaveis = new MensageriaService(
-              notasTurma.map((aluno) => aluno.idAluno),
-              idEscola,
+              notasTurma.map(aluno => aluno.idAluno),
+              idEscola
             )
 
             const nomeDisciplina = await buscarNomeDisciplina({
@@ -62,7 +65,7 @@ class DiarioTurmaController {
 
             const notificacaoResponsaveis =
               await notificarResponsaveis.dispararNotificacaoAtividade({
-                modeloMensagem: `Prezado(a) responsável, o aluno(a) $nomeAluno recebeu nota $notaAtividade de $nomeDisciplina na $descricaoAtividade realizado em $realizadoEm`,
+                modeloMensagem: 'Prezado(a) responsável, o aluno(a) $nomeAluno recebeu nota $notaAtividade de $nomeDisciplina na $descricaoAtividade realizado em $realizadoEm',
                 variaveis: {
                   notaAtividade: Number(notasTurma[0].nota.toFixed(2)),
                   descricaoAtividade: notasTurma[0].descricao,
@@ -72,7 +75,7 @@ class DiarioTurmaController {
                     'PPP',
                     {
                       locale: ptBR,
-                    },
+                    }
                   ),
                 },
               })
@@ -97,7 +100,7 @@ class DiarioTurmaController {
         } catch (error) {
           res.status(500).send({
             status: false,
-            msg: 'Falha ao lançar notas da turma: ' + error,
+            msg: `Falha ao lançar notas da turma: ${error}`,
           })
         }
       } else {
@@ -149,7 +152,7 @@ class DiarioTurmaController {
 
           res.status(200).send({
             status: true,
-            dados: lancamentos.map((lancamento) => {
+            dados: lancamentos.map(lancamento => {
               return {
                 id: lancamento.id,
                 turmaId: lancamento.aluno.idTurma,
@@ -170,7 +173,7 @@ class DiarioTurmaController {
         } catch (error) {
           res.status(500).send({
             status: false,
-            msg: 'Falha ao consultar os lançamentos: ' + error,
+            msg: `Falha ao consultar os lançamentos: ${error}`,
           })
         }
       } else {
@@ -249,6 +252,131 @@ class DiarioTurmaController {
           msg: 'Sessão encerrada!',
         })
       }
+    })
+  }
+
+  async cadastrarConteudo(app: FastifyInstance) {
+    const bodyConteudo = z.object({
+      idDisciplina: z.string().uuid(),
+      idTurma: z.string().uuid(),
+      descricao: z.string(),
+      realizadoEm: z.coerce.date(),
+    })
+
+    app.post('/conteudo', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      const conteudoDisciplina = await bodyConteudo.parseAsync(req.body)
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      try {
+        await inserirConteudoAulaTurma(conteudoDisciplina)
+
+        res.status(201).send({
+          status: true,
+          msg: 'Conteudo aula lançadas com sucesso!',
+        })
+      }
+      catch (error) {
+        res.status(500).send({
+          status: false,
+          msg: 'Falha ao inserir o conteudo',
+          data: null,
+          error,
+        })
+      }
+    })
+  }
+
+  async removerConteudoAula(app: FastifyInstance) {
+    const schemaParam = z.object({
+      id: z.string().uuid(),
+    })
+
+    app.delete('/conteudo/:id', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      const { id } = await schemaParam.parseAsync(req.params)
+
+      try {
+        await removeConteudoAulaTurma({ id })
+
+        res.status(200).send({
+          status: true,
+          msg: 'Conteudo removido com sucesso!'
+        })
+      }
+      catch (error) {
+        res.status(500).send({
+          status: false,
+          msg: 'Falha ao remover o conteudo',
+        })
+      }
+    })
+  }
+
+  async listarConteudosAulaTurma(app: FastifyInstance) {
+    const schemaParam = z.object({
+      turma: z.string().uuid(),
+    })
+
+    const schemaQueryParam = z.object({
+      inicio: z.coerce.date(),
+      fim: z.coerce.date()
+    })
+    
+    app.get('/conteudo/:turma', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      const { turma } = await schemaParam.parseAsync(req.params)
+      const {inicio, fim} = await schemaQueryParam.parseAsync(req.query)
+
+      const listaConteudosAula = await buscarConteudosAulaTurma({
+        idEscola,
+        idTurma: turma,
+        periodo: {
+          inicio,
+          fim
+        }
+      })
+
+      res.status(200).send(listaConteudosAula.map((conteudo) => ({
+        id: conteudo.id,
+        descricao: conteudo.descricao,
+        realizadoEm: conteudo.realizadoEm,
+        disciplina: conteudo.disciplina.nome,
+        idDisciplina: conteudo.idDisciplina,
+        idTurma: conteudo.idTurma
+      })))
     })
   }
 }

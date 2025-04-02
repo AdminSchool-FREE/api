@@ -3,7 +3,7 @@ import { ValidarCredenciaisUsuarioProps } from "../interfaces/UsuarioInterface";
 import { prisma } from "../libraries/PrismaClient";
 import { validarSenhaCriptografada } from "../utils/Bcrypt";
 
-export async function validarCredenciaisUsuario({email, senha}: ValidarCredenciaisUsuarioProps){
+export async function validarCredenciaisUsuario({ email, senha }: ValidarCredenciaisUsuarioProps) {
   const usuario = await prisma.usuario.findUnique({
     where: {
       email,
@@ -11,14 +11,14 @@ export async function validarCredenciaisUsuario({email, senha}: ValidarCredencia
     }
   })
 
-  if(usuario){
+  if (usuario) {
     await validarSenhaCriptografada(senha, usuario?.senha)
 
     return usuario
   }
 
   return null
-  
+
 }
 
 export async function inserirUsuarioEscola({
@@ -26,24 +26,29 @@ export async function inserirUsuarioEscola({
   email,
   senha,
   status,
+  perfil,
   idEscola
-}:InserirUsuarioEscolaProps){
-  return await prisma.usuario.create({data: {
-    nome,
-    email,
-    senha,
-    status,
-    idEscola
-  }})
+}: InserirUsuarioEscolaProps) {
+  return await prisma.usuario.create({
+    data: {
+      nome,
+      email,
+      senha,
+      status,
+      perfil,
+      idEscola
+    }
+  })
 }
 
-export async function listarUsuariosEscola(idEscola:string){
+export async function listarUsuariosEscola(idEscola: string) {
   return await prisma.usuario.findMany({
     select: {
       id: true,
       nome: true,
       email: true,
-      status: true
+      status: true,
+      perfil: true
     },
     where: {
       idEscola
@@ -51,11 +56,12 @@ export async function listarUsuariosEscola(idEscola:string){
   })
 }
 
-export async function consultarUsuario(idUsuario:string){
+export async function consultarUsuario(idUsuario: string) {
   return await prisma.usuario.findUnique({
     select: {
       nome: true,
       email: true,
+      perfil: true
     },
     where: {
       id: idUsuario
@@ -63,7 +69,7 @@ export async function consultarUsuario(idUsuario:string){
   })
 }
 
-export async function modificarStatus(idUsuario: string, idEscola: string, status: boolean){
+export async function modificarStatus(idUsuario: string, idEscola: string, status: boolean) {
   return await prisma.usuario.update({
     select: {
       id: true,

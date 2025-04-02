@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 
 import AuthController from '../controllers/AuthController'
 import DiarioTurmaController from '../controllers/DiarioTurmaController'
@@ -142,6 +142,10 @@ export const routesTurma = (server: FastifyInstance) => {
   server.register(turmaController.realizarChamadaTurma, {
     prefix: 'turma',
   })
+
+  server.register(turmaController.historicoFrequenciaTurma, {
+    prefix: 'turma',
+  })
 }
 
 export const routesDiarioTurma = (server: FastifyInstance) => {
@@ -156,6 +160,18 @@ export const routesDiarioTurma = (server: FastifyInstance) => {
   })
 
   server.register(diarioTurmaController.alterarNotaAtividade, {
+    prefix: 'diario',
+  })
+
+  server.register(diarioTurmaController.cadastrarConteudo, {
+    prefix: 'diario',
+  })
+
+  server.register(diarioTurmaController.removerConteudoAula, {
+    prefix: 'diario',
+  })
+
+  server.register(diarioTurmaController.listarConteudosAulaTurma, {
     prefix: 'diario',
   })
 }

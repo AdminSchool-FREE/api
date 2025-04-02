@@ -1,7 +1,10 @@
-import {
-  AtualizaAtividadeAlunoProps,
+import { formatISO } from 'date-fns'
+import type {
+  AtualizaAtividadeAlunoProps, FiltroConteudoAulaTurmaProps,
   FiltroNotaAtividadeProps,
   NovaNotaAtividadeAlunosProps,
+  NovoConteudoAulaTurmaProps,
+  RemoverConteudoAulaTurmaProps
 } from '../interfaces/DiarioTurmaInterface'
 import { prisma } from '../libraries/PrismaClient'
 
@@ -76,5 +79,41 @@ export async function atualizarNotaAtividadeAluno({
       id: nota.id,
       idAluno: nota.idAluno,
     },
+  })
+}
+
+export async function inserirConteudoAulaTurma(
+  conteudo: NovoConteudoAulaTurmaProps
+) {
+  return await prisma.conteudoAulaTurma.create({
+    data: conteudo
+  })
+}
+
+export async function removeConteudoAulaTurma(
+  { id }: RemoverConteudoAulaTurmaProps
+) {
+  return await prisma.conteudoAulaTurma.delete({
+    where: {
+      id
+    }
+  })
+}
+
+export async function buscarConteudosAulaTurma({ idEscola, idTurma, periodo }: FiltroConteudoAulaTurmaProps) {
+  return await prisma.conteudoAulaTurma.findMany({
+    include: {
+      disciplina: true
+    },
+    where: {
+      turma: {
+        id: idTurma,
+        idEscola
+      },
+      realizadoEm: {
+        gte: periodo.inicio,
+        lte: periodo.fim
+      }
+    }
   })
 }

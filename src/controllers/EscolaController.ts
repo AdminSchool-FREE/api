@@ -49,10 +49,11 @@ class EscolaController {
       nome: z.string(),
       email: z.string().email(),
       senha: z.string().min(8),
+      perfil: z.enum(['PROFESSOR', 'ADMIN']).default('PROFESSOR')
     })
 
     app.post('/usuario', async (req, res) => {
-      const { nome, email, senha } = await bodyUsuarioEscola.parseAsync(
+      const { nome, email, senha, perfil } = await bodyUsuarioEscola.parseAsync(
         req.body,
       )
 
@@ -64,6 +65,7 @@ class EscolaController {
           nome,
           email,
           senha: criptografarSenha(senha),
+          perfil,
           status: true,
           idEscola,
         })
