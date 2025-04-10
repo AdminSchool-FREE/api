@@ -1,5 +1,5 @@
 /* eslint-disable no-case-declarations */
-import { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 
 import {
@@ -15,6 +15,7 @@ import {
 import {
   inserirUsuarioEscola,
   listarUsuariosEscola,
+  modificarSenhaUsuario,
   modificarStatus,
 } from '../repositories/UsuarioRepository'
 import WhatsAppChatPro from '../services/whatsapp/WhatsAppChatPro'
@@ -49,12 +50,12 @@ class EscolaController {
       nome: z.string(),
       email: z.string().email(),
       senha: z.string().min(8),
-      perfil: z.enum(['PROFESSOR', 'ADMIN']).default('PROFESSOR')
+      perfil: z.enum(['PROFESSOR', 'ADMIN']).default('PROFESSOR'),
     })
 
     app.post('/usuario', async (req, res) => {
       const { nome, email, senha, perfil } = await bodyUsuarioEscola.parseAsync(
-        req.body,
+        req.body
       )
 
       const cookieSession = req.cookies
@@ -136,7 +137,7 @@ class EscolaController {
 
       if (idEscola) {
         const { assunto, modelo } = await bodyModeloMensagem.parseAsync(
-          req.body,
+          req.body
         )
 
         const criaModeloMensagem = await inserirModeloMensagem({
@@ -217,7 +218,7 @@ class EscolaController {
 
       const servicoChatPro = new WhatsAppChatPro(
         password,
-        token_dispositivo_api_whatsapp,
+        token_dispositivo_api_whatsapp
       )
 
       const configuraServicoChatPro = await servicoChatPro.configurarServico({
@@ -303,6 +304,53 @@ class EscolaController {
       })
 
       res.status(200).send(excluiDisciplina)
+    })
+  }
+
+  async alterarSenhaUsuario(app: FastifyInstance) {
+    const bodySenhaUsuarioEscola = z.object({
+      novaSenha: z.string().min(8),
+    })
+
+    const paramsUsuario = z.object({
+      id: z.string().uuid(),
+    })
+
+    app.put('/usuario/:id/senha', async (req, res) => {
+      const { novaSenha } = await bodySenhaUsuarioEscola.parseAsync(
+        req.body
+      )
+
+      const { id } = await paramsUsuario.parseAsync(req.params)
+
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (idEscola) {
+        try{
+          await modificarSenhaUsuario({
+            id,
+            senha: criptografarSenha(novaSenha),
+            idEscola,
+          })
+  
+          res.status(200).send({
+            status: true,
+            msg: 'Senha alterada com sucesso',
+          })
+        }
+        catch (error) {
+          res.status(500).send({
+            status: false,
+            msg: 'Erro ao alterar a senha',
+          })
+        }
+      } else {
+        res.status(401).send({
+          status: true,
+          msg: 'Usuário não logado',
+        })
+      }
     })
   }
 }

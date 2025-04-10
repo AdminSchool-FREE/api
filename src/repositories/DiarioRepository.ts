@@ -91,11 +91,14 @@ export async function inserirConteudoAulaTurma(
 }
 
 export async function removeConteudoAulaTurma(
-  { id }: RemoverConteudoAulaTurmaProps
+  { id, escola }: RemoverConteudoAulaTurmaProps
 ) {
   return await prisma.conteudoAulaTurma.delete({
     where: {
-      id
+      id,
+      turma: {
+        idEscola: escola
+      }
     }
   })
 }
@@ -113,6 +116,21 @@ export async function buscarConteudosAulaTurma({ idEscola, idTurma, periodo }: F
       realizadoEm: {
         gte: periodo.inicio,
         lte: periodo.fim
+      }
+    }
+  })
+}
+
+export async function removeAvaliacaoAluno(
+  { id, escola }: RemoverConteudoAulaTurmaProps
+) {
+  return await prisma.notasProvas.delete({
+    where: {
+      id,
+      aluno: {
+        turma: {
+          idEscola: escola
+        }
       }
     }
   })

@@ -58,6 +58,10 @@ export const routesEscola = (server: FastifyInstance) => {
   server.register(escolaController.removerDisciplina, {
     prefix: 'escola',
   })
+
+  server.register(escolaController.alterarSenhaUsuario, {
+    prefix: 'escola',
+  })
 }
 
 export const routesMensagemWhatsApp = (server: FastifyInstance) => {
@@ -172,6 +176,10 @@ export const routesDiarioTurma = (server: FastifyInstance) => {
   })
 
   server.register(diarioTurmaController.listarConteudosAulaTurma, {
+    prefix: 'diario',
+  })
+
+  server.register(diarioTurmaController.removerAvaliacaoTurma, {
     prefix: 'diario',
   })
 }

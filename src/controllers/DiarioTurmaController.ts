@@ -9,6 +9,7 @@ import {
   buscarLancamentosNotasAtividadeTurma,
   inserirConteudoAulaTurma,
   inserirNotaAtividadeTurma,
+  removeAvaliacaoAluno,
   removeConteudoAulaTurma,
 } from '../repositories/DiarioRepository'
 import { buscarNomeDisciplina } from '../repositories/EscolaRepository'
@@ -318,7 +319,7 @@ class DiarioTurmaController {
       const { id } = await schemaParam.parseAsync(req.params)
 
       try {
-        await removeConteudoAulaTurma({ id })
+        await removeConteudoAulaTurma({ id, escola : idEscola ?? '' })
 
         res.status(200).send({
           status: true,
@@ -377,6 +378,43 @@ class DiarioTurmaController {
         idDisciplina: conteudo.idDisciplina,
         idTurma: conteudo.idTurma
       })))
+    })
+  }
+
+  async removerAvaliacaoTurma(app: FastifyInstance) {
+    const schemaParam = z.object({
+      id: z.string().uuid(),
+    })
+
+    app.delete('/lancamento/:id', async (req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      const { id } = await schemaParam.parseAsync(req.params)
+
+      try {
+        await removeAvaliacaoAluno({ id, escola : idEscola ?? '' })
+
+        res.status(200).send({
+          status: true,
+          msg: 'Avaliação removida com sucesso!'
+        })
+      }
+      catch (error) {
+        res.status(500).send({
+          status: false,
+          msg: 'Falha ao remover o avaliação',
+        })
+      }
     })
   }
 }

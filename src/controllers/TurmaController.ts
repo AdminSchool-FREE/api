@@ -10,6 +10,7 @@ import {
 } from '../repositories/AlunoRepository'
 import {
   alterarNomeTurma,
+  getChamadaTurmaRealizada,
   historicoFrequenciaAlunosTurma,
   inserirTurma,
   listarTurmasEscola,
@@ -294,7 +295,12 @@ class TurmaController {
       ),
     })
 
-    app.post('/chamada', async (req, res) => {
+    const paramTurma = z.object({
+      id: z.string().uuid(),
+    })
+
+    app.post('/:id/chamada', async (req, res) => {
+      const { id } = await paramTurma.parseAsync(req.params)
       const { chamada } = await bodyChamada.parseAsync(req.body)
 
       const cookieSession = req.cookies
@@ -302,6 +308,19 @@ class TurmaController {
 
       if (idEscola) {
         try {
+          const chamadaTurmaRealizada = await getChamadaTurmaRealizada(
+            id,
+            chamada[0].dataChamada,
+          )
+
+          if(chamadaTurmaRealizada) {
+            res.status(200).send({
+              message: 'Chamada já realizada para essa turma nesta data',
+            })
+
+            return
+          }
+
           const dadosChamada = chamada.map(aluno => {
             return {
               idAluno: aluno.idAluno,

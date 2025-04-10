@@ -72,6 +72,23 @@ export async function salvarChamadaTurma(
   })
 }
 
+export async function getChamadaTurmaRealizada(
+  idTurma: string,
+  dataChamada: Date,
+) {
+  return await prisma.chamadaTurma.findFirst({
+    where: {
+      aluno: {
+        idTurma,
+      },
+      dataChamada: {
+        gte: new Date(dataChamada),
+        lte: new Date(dataChamada),
+      },
+    },
+  })
+}
+
 export async function historicoFrequenciaAlunosTurma({ turmaId, dataLetivo, escolaId }: { escolaId: string, turmaId: string, dataLetivo: Date }) {
 
   return await prisma.$queryRaw`SELECT ChamadaTurma.id, Aluno.nome, dataChamada, idAluno, presenca

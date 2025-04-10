@@ -46,6 +46,7 @@ export interface NovoConteudoAulaTurmaProps {
 
 export interface RemoverConteudoAulaTurmaProps {
   id: string
+  escola: string
 }
 
 export interface FiltroConteudoAulaTurmaProps {
