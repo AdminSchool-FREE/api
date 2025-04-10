@@ -311,9 +311,10 @@ class TurmaController {
           const chamadaTurmaRealizada = await getChamadaTurmaRealizada(
             id,
             chamada[0].dataChamada,
-          )
+          ) as Array<{ id: string }>
 
-          if(chamadaTurmaRealizada) {
+          if (chamadaTurmaRealizada.length > 0) {
+
             res.status(200).send({
               message: 'Chamada já realizada para essa turma nesta data',
             })
