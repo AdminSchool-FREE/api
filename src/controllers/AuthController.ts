@@ -25,19 +25,19 @@ class AuthController {
         reply
           .status(202)
           .setCookie('session-user', validaUsuario?.id, {
-            httpOnly: true,
+            httpOnly: false,
             maxAge: 60 * 60 * 24 * 1,
             domain: process.env.DOMAIN,
             secure: !!process.env.DOMAIN,
-            sameSite: 'strict',
+            sameSite: process.env.DOMAIN ? 'strict' : 'none',
             path: '/',
           })
           .setCookie('session-company', validaUsuario.idEscola, {
-            httpOnly: true,
+            httpOnly: false,
             domain: process.env.DOMAIN,
             secure: !!process.env.DOMAIN,
             maxAge: 60 * 60 * 24 * 1,
-            sameSite: 'strict',
+            sameSite: process.env.DOMAIN ? 'strict' : 'none',
             path: '/',
           })
           .send({
