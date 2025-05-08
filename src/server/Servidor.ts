@@ -1,6 +1,6 @@
-import fastifyCookie, { FastifyCookieOptions } from '@fastify/cookie'
+import fastifyCookie, { type FastifyCookieOptions } from '@fastify/cookie'
 import cors from '@fastify/cors'
-import fastify, { FastifyInstance } from 'fastify'
+import fastify, { type FastifyInstance } from 'fastify'
 
 class Servidor {
   private servico: FastifyInstance
@@ -17,7 +17,10 @@ class Servidor {
     })
 
     this.servico.register(cors, {
-      origin: "https://app.proffy.manstock.com.br",
+      origin:
+        process.env.NODE_ENV && process.env.NODE_ENV === 'production'
+          ? 'https://app.proffy.manstock.com.br'
+          : true,
       credentials: true,
     })
 
@@ -38,10 +41,10 @@ class Servidor {
         port: this.port,
       })
       .then(() => {
-        console.log('🚀 Servidor online na porta: ' + this.port)
+        console.log(`🚀 Servidor online na porta: ${this.port}`)
       })
       .catch((error: string) => {
-        console.log('🪲 Erro ao inicializar o servidor: ' + error)
+        console.log(`🪲 Erro ao inicializar o servidor: ${error}`)
         process.exit(1)
       })
   }
