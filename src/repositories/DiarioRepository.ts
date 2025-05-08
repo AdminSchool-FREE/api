@@ -59,6 +59,9 @@ export async function buscarLancamentosNotasAtividadeTurma({
       tipoPeriodo,
       idDisciplina,
     },
+    orderBy: {
+      lancamento: 'desc'
+    }
   })
 }
 
