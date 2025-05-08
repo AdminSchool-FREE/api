@@ -17,7 +17,7 @@ class Servidor {
     })
 
     this.servico.register(cors, {
-      origin: 'app.proffy.manstock.com.br',
+      origin: "https://app.proffy.manstock.com.br",
       credentials: true,
     })
 
