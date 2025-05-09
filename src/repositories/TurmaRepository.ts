@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { prisma } from '../libraries/PrismaClient'
+import { ptBR } from 'date-fns/locale'
 
 interface NovaTurmaProps {
   nome: string
@@ -80,7 +81,9 @@ export async function buscaChamadaTurmaRealizada(
   return await prisma.chamadaTurma.findFirst({
     where: {
       dataChamada: {
-        equals: new Date(format(dataChamada, 'yyyy-MM-dd')),
+        equals: new Date(format(dataChamada, 'yyyy-MM-dd', {
+          locale: ptBR
+        })),
       },
       aluno: {
         idTurma,
@@ -107,8 +110,12 @@ export async function historicoFrequenciaAlunosTurma(
   return await prisma.chamadaTurma.findMany({
     where: {
       dataChamada: {
-        gte: new Date(`${format(dataLetivoInicio, 'yyyy-MM-dd')}T00:00:00.000Z`),
-        lt: new Date(`${format(dataLetivoFim, 'yyyy-MM-dd')}T23:59:59.999Z`),
+        gte: new Date(`${format(dataLetivoInicio, 'yyyy-MM-dd', {
+          locale: ptBR
+        })}T00:00:00.000Z`),
+        lt: new Date(`${format(dataLetivoFim, 'yyyy-MM-dd', {
+          locale: ptBR
+        })}T23:59:59.999Z`),
       },
       aluno: {
         idTurma: turmaId,
