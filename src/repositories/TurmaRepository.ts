@@ -78,12 +78,16 @@ export async function buscaChamadaTurmaRealizada(
   escolaId: string,
   dataChamada: Date,
 ) {
+  console.log(new Date(format(dataChamada, 'yyyy-MM-dd')))
   return await prisma.chamadaTurma.findFirst({
     where: {
       dataChamada: {
-        equals: new Date(format(dataChamada, 'yyyy-MM-dd', {
+        gte: new Date(`${format(dataChamada, 'yyyy-MM-dd', {
           locale: ptBR
-        })),
+        })}T00:00:00.000Z`),
+        lte: new Date(`${format(dataChamada, 'yyyy-MM-dd', {
+          locale: ptBR
+        })}T23:59:59.999Z`),
       },
       aluno: {
         idTurma,
