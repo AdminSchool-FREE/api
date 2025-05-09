@@ -72,28 +72,86 @@ export async function salvarChamadaTurma(
   })
 }
 
-export async function getChamadaTurmaRealizada(
+export async function buscaChamadaTurmaRealizada(
   idTurma: string,
+  escolaId: string,
   dataChamada: Date,
 ) {
-  return await prisma.$queryRaw`SELECT ChamadaTurma.id
-    from ChamadaTurma 
-    join Aluno on Aluno.id = ChamadaTurma.idAluno
-    join Turma on Aluno.idTurma = Turma.id
-    AND DATE(ChamadaTurma.dataChamada) = ${format(dataChamada, 'yyyy-MM-dd')}
-    AND Aluno.idTurma = ${idTurma}
-  `
+  return await prisma.chamadaTurma.findFirst({
+    where: {
+      dataChamada: {
+        equals: new Date(format(dataChamada, 'yyyy-MM-dd')),
+      },
+      aluno: {
+        idTurma,
+        turma: {
+          idEscola: escolaId,
+        }
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
 }
 
-export async function historicoFrequenciaAlunosTurma({ turmaId, dataLetivo, escolaId }: { escolaId: string, turmaId: string, dataLetivo: Date }) {
+export async function historicoFrequenciaAlunosTurma(
+  {
+    turmaId,
+    dataLetivoInicio,
+    dataLetivoFim,
+    escolaId
+  }: { escolaId: string, turmaId: string, dataLetivoInicio: Date, dataLetivoFim: Date }
+) {
 
-  return await prisma.$queryRaw`SELECT ChamadaTurma.id, Aluno.nome, dataChamada, idAluno, presenca
-    from ChamadaTurma 
-    join Aluno on Aluno.id = ChamadaTurma.idAluno
-    join Turma on Aluno.idTurma = Turma.id
-    where Turma.idEscola = ${escolaId} 
-    AND DATE(ChamadaTurma.dataChamada) = ${format(dataLetivo, 'yyyy-MM-dd')}
-    AND Aluno.idTurma = ${turmaId}
-    ORDER BY Aluno.nome ASC
-  `
+  return await prisma.chamadaTurma.findMany({
+    where: {
+      dataChamada: {
+        gte: new Date(`${format(dataLetivoInicio, 'yyyy-MM-dd')}T00:00:00.000Z`),
+        lt: new Date(`${format(dataLetivoFim, 'yyyy-MM-dd')}T23:59:59.999Z`),
+      },
+      aluno: {
+        idTurma: turmaId,
+        turma: {
+          idEscola: escolaId,
+        },
+      },
+    },
+    select: {
+      id: true,
+      dataChamada: true,
+      idAluno: true,
+      presenca: true,
+      aluno: {
+        select: {
+          nome: true,
+        },
+      },
+    },
+    orderBy: {
+      aluno: {
+        nome: 'asc',
+      },
+    },
+  });
+}
+
+export async function getHistoricoChamadasTurma({ turmaId, escolaId }: { turmaId: string, escolaId: string }) {
+  return await prisma.chamadaTurma.findMany({
+    where: {
+      aluno: {
+        idTurma: turmaId,
+        turma: {
+          idEscola: escolaId
+        }
+      },
+    },
+    select: {
+      dataChamada: true,
+    },
+    orderBy: {
+      dataChamada: 'asc',
+    },
+    distinct: ['dataChamada'],
+  });
 }

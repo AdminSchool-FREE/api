@@ -123,48 +123,47 @@ export async function matricularNovoAluno({
     })
 
     return aluno.aluno
-  } else {
-    const aluno = await prisma.responsavelAluno.create({
-      select: {
-        aluno: {
-          select: {
-            id: true,
-            nome: true,
-            cpf: true,
-            ra: true,
-            rg: true,
-            dataNascimento: true,
-            idTurma: true,
-          },
+  }
+  const aluno = await prisma.responsavelAluno.create({
+    select: {
+      aluno: {
+        select: {
+          id: true,
+          nome: true,
+          cpf: true,
+          ra: true,
+          rg: true,
+          dataNascimento: true,
+          idTurma: true,
         },
       },
-      data: {
-        aluno: {
-          create: {
-            nome,
-            cpf,
-            ra,
-            rg,
-            dataNascimento,
-            idTurma,
-          },
+    },
+    data: {
+      aluno: {
+        create: {
+          nome,
+          cpf,
+          ra,
+          rg,
+          dataNascimento,
+          idTurma,
         },
-        responsavel: {
-          create: {
-            nome: nomeResponsavel,
-            cpf: cpfResponsavel,
-            TelefoneResponsavel: {
-              createMany: {
-                data: telefones,
-              },
+      },
+      responsavel: {
+        create: {
+          nome: nomeResponsavel,
+          cpf: cpfResponsavel,
+          TelefoneResponsavel: {
+            createMany: {
+              data: telefones,
             },
           },
         },
       },
-    })
+    },
+  })
 
-    return aluno.aluno
-  }
+  return aluno.aluno
 }
 
 export async function salvarTransferenciaAlunoTurma(
@@ -522,9 +521,8 @@ export async function salvarNovoResponsavelAluno({
         },
       },
     })
-  } else {
-    return null
   }
+  return null
 }
 
 export async function vincularResponsavelAluno({

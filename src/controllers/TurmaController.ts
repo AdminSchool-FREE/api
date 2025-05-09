@@ -10,7 +10,7 @@ import {
 } from '../repositories/AlunoRepository'
 import {
   alterarNomeTurma,
-  getChamadaTurmaRealizada,
+  buscaChamadaTurmaRealizada,
   historicoFrequenciaAlunosTurma,
   inserirTurma,
   listarTurmasEscola,
@@ -308,12 +308,13 @@ class TurmaController {
 
       if (idEscola) {
         try {
-          const chamadaTurmaRealizada = await getChamadaTurmaRealizada(
+          const chamadaTurmaRealizada = await buscaChamadaTurmaRealizada(
             id,
+            idEscola,
             chamada[0].dataChamada,
-          ) as Array<{ id: string }>
+          )
 
-          if (chamadaTurmaRealizada.length > 0) {
+          if (chamadaTurmaRealizada) {
 
             res.status(200).send({
               message: 'Chamada já realizada para essa turma nesta data',
@@ -376,7 +377,8 @@ class TurmaController {
     })
 
     const schemaQueryParam = z.object({
-      dataChamada: z.coerce.date(),
+      inicio: z.coerce.date(),
+      fim: z.coerce.date()
     })
 
     app.get('/chamada/:turma', async (req, res) => {
@@ -393,21 +395,72 @@ class TurmaController {
       }
 
       const { turma } = await schemaParam.parseAsync(req.params)
-      const { dataChamada } = await schemaQueryParam.parseAsync(req.query)
+      const { inicio, fim } = await schemaQueryParam.parseAsync(req.query)
 
       const historicoFrequencia = await historicoFrequenciaAlunosTurma({
         escolaId: idEscola,
         turmaId: turma,
-        dataLetivo: dataChamada
-      }) as Array<{
-        id: string,
-        idAluno: string,
-        nome: string,
-        dataChamada: Date,
-        presenca: boolean
-      }>
+        dataLetivoInicio: inicio,
+        dataLetivoFim: fim
+      })
 
-      res.status(200).send(historicoFrequencia)
+      res.status(200).send(historicoFrequencia.map(({id, idAluno, aluno, dataChamada, presenca}) => ({
+        id,
+        idAluno,
+        dataChamada,
+        presenca,
+        nome: aluno.nome
+      })))
+    })
+  }
+
+  async verificaChamadaRealizadaTurma(app: FastifyInstance){
+    const schemaParam = z.object({
+      turma: z.string().uuid(),
+    })
+
+    const schemaQueryParam = z.object({
+      dataChamada: z.coerce.date(),
+    })
+
+    app.get('/:turma/verificacao', async(req, res) => {
+      const cookieSession = req.cookies
+      const idEscola = cookieSession['session-company']
+
+      if (!idEscola) {
+        res.status(401).send({
+          status: false,
+          msg: 'Sessão encerrada!',
+        })
+
+        return
+      }
+
+      const { turma } = await schemaParam.parseAsync(req.params)
+      const { dataChamada } = await schemaQueryParam.parseAsync(req.query)
+
+      const chamadaTurmaRealizada = await buscaChamadaTurmaRealizada(
+        turma,
+        idEscola,
+        dataChamada,
+      )
+
+      if (chamadaTurmaRealizada) {
+
+        res.status(200).send({
+          status: true,
+          msg: 'Chamada realizada nessa turma!',
+          chamada: true,
+        })
+
+        return
+      }
+
+      res.status(200).send({
+        status: true,
+        msg: 'Chamada não realizada nessa turma!',
+        chamada: false
+      })
     })
   }
 }

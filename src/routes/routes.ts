@@ -150,6 +150,10 @@ export const routesTurma = (server: FastifyInstance) => {
   server.register(turmaController.historicoFrequenciaTurma, {
     prefix: 'turma',
   })
+
+  server.register(turmaController.verificaChamadaRealizadaTurma, {
+    prefix: 'chamada'
+  })
 }
 
 export const routesDiarioTurma = (server: FastifyInstance) => {
