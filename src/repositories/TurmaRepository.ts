@@ -143,6 +143,7 @@ export async function historicoFrequenciaAlunosTurma(
       aluno: {
         nome: 'asc',
       },
+      dataChamada: 'desc'
     },
   });
 }
@@ -161,7 +162,7 @@ export async function getHistoricoChamadasTurma({ turmaId, escolaId }: { turmaId
       dataChamada: true,
     },
     orderBy: {
-      dataChamada: 'asc',
+      dataChamada: 'desc',
     },
     distinct: ['dataChamada'],
   });
