@@ -110,7 +110,6 @@ export async function historicoFrequenciaAlunosTurma(
     escolaId
   }: { escolaId: string, turmaId: string, dataLetivoInicio: Date, dataLetivoFim: Date }
 ) {
-
   return await prisma.chamadaTurma.findMany({
     where: {
       dataChamada: {
@@ -142,8 +141,7 @@ export async function historicoFrequenciaAlunosTurma(
     orderBy: {
       aluno: {
         nome: 'asc',
-      },
-      dataChamada: 'desc'
+      }
     },
   });
 }
